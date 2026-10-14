@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17151d">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Zegar kroków</title>
+<style>
+/* fonty lokalne (fontsource, licencja OFL) — działa bez internetu */
+@font-face { font-family: 'Archivo'; font-style: normal; font-display: swap; font-weight: 100 900; font-stretch: 62% 125%; src: url(fonts/archivo-latin-var.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Figtree'; font-style: normal; font-display: swap; font-weight: 400; src: url(fonts/figtree-latin-400.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Figtree'; font-style: normal; font-display: swap; font-weight: 500; src: url(fonts/figtree-latin-500.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Figtree'; font-style: normal; font-display: swap; font-weight: 600; src: url(fonts/figtree-latin-600.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-display: swap; font-weight: 500; src: url(fonts/plexmono-latin-500.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-display: swap; font-weight: 600; src: url(fonts/plexmono-latin-600.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Archivo'; font-style: normal; font-display: swap; font-weight: 100 900; font-stretch: 62% 125%; src: url(fonts/archivo-latin-ext-var.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Figtree'; font-style: normal; font-display: swap; font-weight: 400; src: url(fonts/figtree-latin-ext-400.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Figtree'; font-style: normal; font-display: swap; font-weight: 500; src: url(fonts/figtree-latin-ext-500.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Figtree'; font-style: normal; font-display: swap; font-weight: 600; src: url(fonts/figtree-latin-ext-600.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-display: swap; font-weight: 500; src: url(fonts/plexmono-latin-ext-500.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-display: swap; font-weight: 600; src: url(fonts/plexmono-latin-ext-600.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+/* reset jak w artefakcie */
+:root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { margin: 0; } [hidden] { display: none !important; }
+/* Układ: scena (tarcza zegara + pasek czasu, pod nimi transport) po lewej, panel ustawień po prawej; na telefonie jedna kolumna.
+   Świadomie jeden ciemny wygląd, jak w Studiu Zouka 3D: wieczorna sala, kolory kroków świecą na tle.
+   Długość kroku kodowana trzy razy: długość łuku/klocka, szerokość kroju słowa (Archivo wdth), dźwięk. */
+:root {
+  color-scheme: dark;
+  --bg: #17151d;
+  --stage: #1d1a24;
+  --panel: #221f2a;
+  --panel-2: #2b2735;
+  --line: #3a3547;
+  --fg: #efeaf5;
+  --muted: #a69eb6;
+  --accent: #f2a7c3;          /* wskazówka, „raz”, odliczanie */
+  --accent-soft: rgba(242, 167, 195, .10);
+  --accent-fg: #2b1220;
+  --slow: #ffc857;            /* długi krok */
+  --quick: #6fd6cf;           /* krótki krok */
+  --tap: #b9a3e8;             /* tap bez ciężaru */
+  --ink-on: #1b1620;          /* tekst na kolorowym łuku */
+  --good: #7ee08f;
+  --ok: #f0a35e;
+  --off: #ff6b6b;
+  --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 14.5px; line-height: 1.45;
+  padding-block: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.app { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 14px 18px; align-items: start; }
+header { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 18px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-variation-settings: "wdth" 125; font-size: clamp(22px, 3.4vw, 32px); letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+h1 .s { color: var(--slow); } h1 .q { color: var(--quick); font-variation-settings: "wdth" 70; }
+header p { margin: 0; color: var(--muted); max-width: 72ch; }
+
+/* ---------- scena ---------- */
+.stage { background: var(--stage); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.circle-wrap { position: relative; width: min(100%, 600px, 66vh); max-width: 100%; aspect-ratio: 1; margin: 0 auto; container-type: inline-size; touch-action: manipulation; }
+#circle { display: block; width: 100%; height: 100%; overflow: visible; }
+.now { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.now-in { width: 50%; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.word { font-family: var(--font-display); font-weight: 800; line-height: 1; font-size: clamp(26px, 12cqi, 84px); letter-spacing: -0.01em; white-space: nowrap; transition: font-variation-settings .08s linear; }
+.word[data-type="S"] { color: var(--slow); font-variation-settings: "wdth" 125; }
+.word[data-type="Q"] { color: var(--quick); font-variation-settings: "wdth" 68; }
+.word[data-type="T"] { color: var(--tap); font-variation-settings: "wdth" 62; }
+.word[data-type="count"] { color: var(--accent); font-variation-settings: "wdth" 100; }
+.word[data-type="beat"] { color: var(--muted); font-variation-settings: "wdth" 100; }
+.word[data-type="rest"] { font-size: clamp(15px, 4.6cqi, 30px); font-variation-settings: "wdth" 100; white-space: normal; line-height: 1.25; text-wrap: balance; }
+.word[data-type="rest"] .S { color: var(--slow); font-variation-settings: "wdth" 125; }
+.word[data-type="rest"] .Q { color: var(--quick); font-variation-settings: "wdth" 68; }
+.word[data-type="rest"] .T { color: var(--tap); font-variation-settings: "wdth" 62; }
+.meta { font-family: var(--font-mono); font-size: clamp(11px, 2.4cqi, 14px); color: var(--muted); min-height: 1.4em; }
+.meta .silent { color: var(--accent); }
+.fill { width: 70%; height: 6px; border-radius: 3px; background: var(--panel-2); overflow: hidden; }
+.fill i { display: block; height: 100%; width: 0; background: var(--muted); border-radius: 3px; }
+.fill[data-type="S"] i { background: var(--slow); } .fill[data-type="Q"] i { background: var(--quick); } .fill[data-type="T"] i { background: var(--tap); }
+.fill[data-type="count"] i { background: var(--accent); }
+
+.line-now { display: flex; align-items: center; justify-content: center; gap: 10px 22px; flex-wrap: wrap; container-type: inline-size; padding-block: 6px; }
+.line-now .word { font-size: clamp(34px, 9cqi, 96px); }
+.line-now .word[data-type="rest"] { font-size: clamp(18px, 4cqi, 32px); }
+.line-now .side { display: flex; flex-direction: column; gap: 8px; min-width: 160px; }
+.line-now .fill { width: 100%; }
+
+.tl-wrap { overflow-x: auto; }
+#timeline { display: block; width: 100%; min-width: 520px; height: auto; }
+
+/* SVG: tarcza i pasek */
+.rim { fill: none; stroke: var(--line); stroke-width: 1.5; }
+.face { fill: var(--bg); stroke: none; }
+.tick { stroke: var(--muted); stroke-width: 2; }
+.tick.half { stroke-width: 1; opacity: .55; }
+.tick.one { stroke: var(--accent); stroke-width: 3.5; }
+.bnum { fill: var(--muted); font: 500 15px var(--font-mono); text-anchor: middle; dominant-baseline: central; }
+.bnum.half { font-size: 11px; opacity: .7; }
+.bnum.one { fill: var(--accent); }
+.bnum.now { fill: var(--fg); font-weight: 600; }
+.bnum.one.now { fill: var(--accent); }
+.arc { fill: none; stroke-width: 30; stroke-linecap: butt; transition: opacity .12s; }
+.arc.S { stroke: var(--slow); } .arc.Q { stroke: var(--quick); } .arc.T { stroke: var(--tap); stroke-width: 12; }
+.alab { fill: var(--ink-on); font-family: var(--font-display); font-weight: 700; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.alab.S { font-variation-settings: "wdth" 125; } .alab.Q { font-variation-settings: "wdth" 72; }
+.alab.T { fill: var(--tap); font-variation-settings: "wdth" 62; font-weight: 600; }
+.poly { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; stroke-opacity: .5; stroke-linejoin: round; }
+.vtx { fill: var(--fg); }
+.vtx.T { fill: var(--tap); }
+.hand line { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+.hand circle { fill: var(--accent); }
+.tapm { stroke: var(--bg); stroke-width: 1.5; }
+.tapm.good { fill: var(--good); } .tapm.ok { fill: var(--ok); } .tapm.off { fill: var(--off); }
+.col { fill: transparent; }
+.col.now { fill: var(--accent-soft); }
+.grid-l { stroke: var(--line); stroke-width: 1; }
+.grid-l.beat { stroke: var(--muted); stroke-opacity: .45; }
+.blk { rx: 5; transition: opacity .12s; }
+.blk.S { fill: var(--slow); } .blk.Q { fill: var(--quick); } .blk.T { fill: var(--tap); }
+.blab { fill: var(--ink-on); font-family: var(--font-display); font-weight: 700; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.blab.S { font-variation-settings: "wdth" 125; } .blab.Q { font-variation-settings: "wdth" 72; } .blab.T { font-variation-settings: "wdth" 62; }
+.foot { fill: var(--muted); font: 600 13px var(--font-mono); text-anchor: middle; dominant-baseline: central; }
+.rowlab { fill: var(--muted); font: 500 10px var(--font-mono); letter-spacing: .08em; dominant-baseline: central; opacity: .7; }
+.head { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+svg.playing .arc, svg.playing .blk { opacity: .38; }
+svg.playing .arc.on, svg.playing .blk.on { opacity: 1; }
+
+/* transport */
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding-top: 10px; border-top: 1px solid var(--line); }
+.btn { font: 600 14px var(--font-body); color: var(--fg); background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; min-height: 38px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); min-width: 96px; }
+.btn.primary:hover { color: var(--accent-fg); filter: brightness(1.06); }
+.btn.sq { width: 38px; padding: 0; font-family: var(--font-mono); font-size: 18px; }
+.btn.tapb { min-width: 120px; }
+.btn.tapb.hit { background: var(--panel-2); border-color: var(--fg); }
+.btn svg { width: 14px; height: 14px; fill: currentColor; }
+.tempo { display: flex; align-items: center; gap: 8px; flex: 1 1 260px; min-width: 0; }
+.tempo input { flex: 1 1 auto; min-width: 80px; accent-color: var(--accent); }
+.tempo output { font: 600 15px var(--font-mono); font-variant-numeric: tabular-nums; min-width: 72px; text-align: right; }
+.info { display: flex; flex-wrap: wrap; gap: 4px 16px; font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); width: 100%; }
+.info .S { color: var(--slow); } .info .Q { color: var(--quick); } .info .T { color: var(--tap); }
+.tapread { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
+.tapread b { font-weight: 600; color: var(--fg); }
+.tapread .good { color: var(--good); } .tapread .ok { color: var(--ok); } .tapread .off { color: var(--off); }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.stage:fullscreen { background: var(--bg); border: 0; border-radius: 0; padding: 24px max(24px, env(safe-area-inset-left, 0px)); justify-content: center; overflow: auto; }
+.stage:fullscreen .circle-wrap { width: min(100%, 74vh); }
+.stage:fullscreen[data-view="both"] .circle-wrap { width: min(100%, 58vh); }
+
+/* ---------- panel ---------- */
+.panel { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+h2 { font-family: var(--font-display); font-weight: 600; font-variation-settings: "wdth" 112; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.row { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; }
+.lbl { color: var(--muted); font-size: 13px; min-width: 62px; }
+select, input[type=text] { font: 500 14px var(--font-body); color: var(--fg); background: var(--panel-2); border: 1px solid var(--line); border-radius: 5px; padding: 6px 8px; min-height: 34px; }
+select { flex: 1 1 auto; min-width: 0; }
+input[type=text] { width: 100%; min-width: 0; }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.seg button { font: 600 13px var(--font-body); color: var(--muted); background: transparent; border: 0; padding: 6px 10px; min-height: 32px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--panel-2); color: var(--accent); }
+.field { display: grid; grid-template-columns: 76px minmax(0, 1fr) 44px; align-items: center; gap: 10px; }
+.field label { color: var(--muted); font-size: 13px; }
+.field input { width: 100%; accent-color: var(--accent); }
+.field output { font: 500 13px var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; }
+.check { display: flex; align-items: center; gap: 9px; font-size: 13.5px; cursor: pointer; }
+.check input { width: 16px; height: 16px; accent-color: var(--accent); margin: 0; flex: none; }
+.hint { color: var(--muted); font-size: 12.5px; margin: 0; }
+.custom { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.custom label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
+
+/* siatka TUBS: jedna kratka = jedna jednostka czasu */
+.tubs { display: flex; flex-wrap: wrap; gap: 8px 6px; }
+.tubs .beat { display: flex; gap: 2px; }
+.cell { width: 34px; height: 38px; border: 1px solid var(--line); border-radius: 4px; background: transparent; color: var(--muted); font: 600 13px var(--font-mono); cursor: pointer; padding: 0; display: grid; place-items: center; }
+.cell.half { width: 26px; font-size: 11px; }
+.cell:hover { border-color: var(--fg); }
+.cell[data-state="1"].S { background: var(--slow); border-color: var(--slow); color: var(--ink-on); }
+.cell[data-state="1"].Q { background: var(--quick); border-color: var(--quick); color: var(--ink-on); }
+.cell[data-state="2"] { border: 1.5px dashed var(--tap); color: var(--tap); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--muted); }
+.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.legend .S { background: var(--slow); } .legend .Q { background: var(--quick); } .legend .T { border: 1.5px dashed var(--tap); }
+.note { margin: 0; font-size: 13px; color: var(--muted); }
+.keys { color: var(--muted); font-size: 12.5px; margin: 0; }
+kbd { font: 500 11.5px var(--font-mono); background: var(--panel-2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 3px; padding: 0 5px; color: var(--fg); }
+
+@media (max-width: 940px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arc, .blk, .word { transition: none; }
+}
+</style>
+
+</head>
+<body>
+<main class="app">
+  <header>
+    <h1><span class="s">Slow</span> <span class="q">quick quick</span> · Zegar kroków</h1>
+    <p>Rytm kroków na tarczy i na pasku czasu, z dźwiękiem. Długi krok ma dłuższy łuk, szerszą literę i dłuższy dźwięk. Stukaj w rytm, żeby zobaczyć, czy trafiasz.</p>
+  </header>
+
+  <section class="stage" id="stage" data-view="both" aria-label="Wizualizacja rytmu">
+    <div class="circle-wrap" id="circleWrap">
+      <svg id="circle" viewBox="-228 -228 456 456" role="img" aria-label="Tarcza rytmu"></svg>
+      <div class="now" aria-hidden="true">
+        <div class="now-in">
+          <div class="word" id="wordC" data-type="rest"></div>
+          <div class="meta" id="metaC"></div>
+          <div class="fill" id="fillC"><i></i></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="line-now" id="lineNow" hidden aria-hidden="true">
+      <div class="word" id="wordL" data-type="rest"></div>
+      <div class="side">
+        <div class="meta" id="metaL"></div>
+        <div class="fill" id="fillL"><i></i></div>
+      </div>
+    </div>
+
+    <div class="tl-wrap" id="tlWrap">
+      <svg id="timeline" role="img" aria-label="Pasek czasu rytmu"></svg>
+    </div>
+
+    <div class="bar">
+      <button class="btn primary" id="play" type="button"></button>
+      <div class="tempo">
+        <button class="btn sq" id="bpmDown" type="button" aria-label="Wolniej">−</button>
+        <input id="bpm" type="range" min="40" max="160" step="1" aria-label="Tempo w uderzeniach na minutę">
+        <button class="btn sq" id="bpmUp" type="button" aria-label="Szybciej">+</button>
+        <output id="bpmOut" for="bpm"></output>
+      </div>
+      <button class="btn tapb" id="tapBtn" type="button">Stukaj <kbd>T</kbd></button>
+      <button class="btn" id="fsBtn" type="button" hidden><svg viewBox="0 0 14 14" aria-hidden="true"><path d="M1 1h4.5v1.6H2.6v2.9H1zm7.5 0H13v4.5h-1.6V2.6H8.5zM1 8.5h1.6v2.9h2.9V13H1zm10.4 0H13V13H8.5v-1.6h2.9z"/></svg>Pełny ekran</button>
+      <div class="info" id="info"></div>
+      <div class="tapread" id="tapRead">Stuknięcia pokazują się na tarczy i pasku po starcie.</div>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <section class="card" aria-labelledby="h-pat">
+      <h2 id="h-pat">Wzór kroków</h2>
+      <div class="row">
+        <select id="preset" aria-label="Gotowy wzór"></select>
+      </div>
+      <p class="note" id="presetNote"></p>
+      <div class="row">
+        <span class="lbl">Cykl</span>
+        <select id="beats" aria-label="Długość cyklu">
+          <option value="4">4 uderzenia</option>
+          <option value="6">6 uderzeń</option>
+          <option value="8">8 uderzeń</option>
+          <option value="12">12 uderzeń</option>
+          <option value="16">16 uderzeń</option>
+        </select>
+        <label class="check"><input type="checkbox" id="half"> pół uderzenia (&amp;)</label>
+      </div>
+      <div class="tubs" id="grid" role="group" aria-label="Siatka kroków"></div>
+      <div class="legend"><span><i class="S"></i>długi</span><span><i class="Q"></i>krótki</span><span><i class="T"></i>tap (bez ciężaru)</span></div>
+      <p class="hint">Kliknij kratkę: krok → tap → puste. Długi i krótki liczą się same: najkrótszy odstęp między krokami to „quick”, dłuższy to „slow”.</p>
+    </section>
+
+    <section class="card" aria-labelledby="h-names">
+      <h2 id="h-names">Nazwy</h2>
+      <div class="seg" role="group" aria-label="Nazwy kroków" id="names">
+        <button type="button" data-v="sq">slow · quick</button>
+        <button type="button" data-v="tt">tum · tchi</button>
+        <button type="button" data-v="pl">wolno · szybko</button>
+        <button type="button" data-v="num">1 2 3</button>
+        <button type="button" data-v="custom">własne</button>
+      </div>
+      <div class="custom" id="customBox" hidden>
+        <label>Długi krok<input type="text" id="customS" maxlength="14"></label>
+        <label>Krótki krok<input type="text" id="customQ" maxlength="14"></label>
+      </div>
+      <div class="row">
+        <span class="lbl">Stopy</span>
+        <div class="seg" role="group" aria-label="Stopy" id="feet">
+          <button type="button" data-v="off">ukryj</button>
+          <button type="button" data-v="R">od prawej</button>
+          <button type="button" data-v="L">od lewej</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="h-snd">
+      <h2 id="h-snd">Dźwięk</h2>
+      <div class="seg" role="group" aria-label="Brzmienie kroków" id="sound">
+        <button type="button" data-v="perc">perkusja tum / tchi</button>
+        <button type="button" data-v="tone">tony o długości kroku</button>
+      </div>
+      <div class="field"><label for="vMetro">Metronom</label><input id="vMetro" type="range" min="0" max="1" step="0.05"><output id="vMetroOut" for="vMetro"></output></div>
+      <div class="field"><label for="vSteps">Kroki</label><input id="vSteps" type="range" min="0" max="1" step="0.05"><output id="vStepsOut" for="vSteps"></output></div>
+      <label class="check"><input type="checkbox" id="countIn"> Odliczanie „5, 6, 7, 8” przed startem</label>
+      <label class="check"><input type="checkbox" id="gap"> Co drugi cykl bez dźwięku kroków (zostaje metronom)</label>
+      <p class="hint">Pomiar stuknięć odejmuje opóźnienie głośnika zgłaszane przez przeglądarkę. Słuchawki Bluetooth dokładają swoje, więc wynik może wyjść stale „za późno”.</p>
+    </section>
+
+    <section class="card" aria-labelledby="h-view">
+      <h2 id="h-view">Widok</h2>
+      <div class="seg" role="group" aria-label="Widok" id="view">
+        <button type="button" data-v="both">tarcza + pasek</button>
+        <button type="button" data-v="circle">tarcza</button>
+        <button type="button" data-v="line">pasek</button>
+      </div>
+      <label class="check"><input type="checkbox" id="poly"> Kształt rytmu na tarczy (wielokąt z kroków)</label>
+      <p class="keys"><kbd>Spacja</kbd> start/stop · <kbd>T</kbd> stuknięcie · <kbd>↑</kbd><kbd>↓</kbd> tempo (z <kbd>Shift</kbd> o 5)</p>
+    </section>
+  </aside>
+</main>
+
+<script>
+(() => {
+"use strict";
+const NS = "http://www.w3.org/2000/svg";
+const $ = (s) => document.querySelector(s);
+function sv(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const r2 = (x) => Math.round(x * 100) / 100;
+
+/* ---------- dane ---------- */
+// cells: 0 puste, 1 krok (z ciężarem), 2 tap (bez ciężaru); jedna kratka = 1/sub uderzenia
+const PRESETS = {
+  zouk:    { name: "Zouk: tum-tchi-tchi", beats: 8, sub: 1, cells: [1,0,1,1,1,0,1,1], names: "tt", feet: "R",
+             note: "Tum na 1 trwa dwa uderzenia, tchi na 3 i 4; druga połowa to samo na 5, 7, 8. Stopy prowadzonej: P L P | L P L." },
+  fox:     { name: "Foxtrot towarzyski: S S Q Q", beats: 6, sub: 1, cells: [1,0,1,0,1,1], names: "sq", feet: "L",
+             note: "Dwa slow po dwa uderzenia i dwa quick po jednym. Cykl ma 6 uderzeń, więc przesuwa się względem taktu 4/4." },
+  rumba:   { name: "Rumba / bolero: Q Q S", beats: 4, sub: 1, cells: [0,1,1,1], names: "sq", feet: "L",
+             note: "Start na 2: quick 2, quick 3, slow 4–1. Na „raz” nie ma nowego kroku, trwa slow." },
+  salsa:   { name: "Salsa on1: Q Q S", beats: 8, sub: 1, cells: [1,1,1,0,1,1,1,0], names: "sq", feet: "L",
+             note: "Kroki na 1 2 3 i 5 6 7; na 4 i 8 pauza, więc krok na 3 i 7 jest długi." },
+  chacha:  { name: "Cha-cha: 2 3 4&1", beats: 4, sub: 2, cells: [1,0,1,0,1,0,1,1], names: "sq", feet: "L",
+             note: "Tu quick to pół uderzenia, a slow to całe: 2 slow, 3 slow, 4 quick, & quick, 1 slow." },
+  bachata: { name: "Bachata: 1 2 3 tap", beats: 8, sub: 1, cells: [1,1,1,2,1,1,1,2], names: "sq", feet: "L",
+             note: "Wszystkie kroki równe (quick); na 4 i 8 tap bez przeniesienia ciężaru." },
+};
+const NAMESETS = { sq: { S: "slow", Q: "quick" }, tt: { S: "tum", Q: "tchi" }, pl: { S: "wolno", Q: "szybko" } };
+const KEY = "zegar-krokow-v1";
+const DEF = { preset: "zouk", beats: 8, sub: 1, cells: [1,0,1,1,1,0,1,1], names: "tt", custom: { S: "slow", Q: "quick" },
+  feet: "R", bpm: 80, view: "both", poly: true, sound: "perc", vMetro: 0.35, vSteps: 0.85, countIn: true, gap: false };
+
+let S = load();
+function load() {
+  let s = JSON.parse(JSON.stringify(DEF));
+  try {
+    const j = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (j && typeof j === "object") s = { ...s, ...j, custom: { ...s.custom, ...(j.custom || {}) } };
+  } catch (e) { /* bez pamięci przeglądarki: domyślne */ }
+  if (![4, 6, 8, 12, 16].includes(+s.beats)) s.beats = 8;
+  if (![1, 2].includes(+s.sub)) s.sub = 1;
+  s.beats = +s.beats; s.sub = +s.sub;
+  if (!Array.isArray(s.cells)) s.cells = [];
+  const N = s.beats * s.sub;
+  s.cells = Array.from({ length: N }, (_, i) => [0, 1, 2].includes(s.cells[i]) ? s.cells[i] : 0);
+  s.bpm = Math.min(160, Math.max(40, +s.bpm || 80));
+  return s;
+}
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignoruj */ } }
+
+/* ---------- pochodne ---------- */
+let D;
+function derive() {
+  const N = S.beats * S.sub, on = [];
+  for (let i = 0; i < N; i++) if (S.cells[i]) on.push(i);
+  const steps = [], byCell = new Array(N).fill(null), curAt = new Array(N).fill(-1);
+  if (on.length) {
+    const ds = on.map((i, k) => (k + 1 < on.length ? on[k + 1] : on[0] + N) - i);
+    let unit = Infinity;
+    on.forEach((i, k) => { if (S.cells[i] === 1) unit = Math.min(unit, ds[k]); });
+    let fk = 0;
+    on.forEach((i, k) => {
+      const tap = S.cells[i] === 2, d = ds[k];
+      const type = tap ? "T" : (on.length === 1 ? "S" : (d <= unit ? "Q" : "S"));
+      const st = { i, d, type, tap, fk: tap ? -1 : fk++, idx: k };
+      steps.push(st); byCell[i] = st;
+    });
+    for (let c = 0; c < N; c++) {
+      let best = steps.length - 1;
+      for (const st of steps) if (st.i <= c) best = st.idx;
+      curAt[c] = best;
+    }
+  }
+  D = { N, steps, byCell, curAt, stepsN: steps.filter((s) => !s.tap).length };
+}
+function word(st) {
+  if (st.type === "T") return "tap";
+  if (S.names === "num") return countLabel(st);
+  const set = S.names === "custom" ? S.custom : NAMESETS[S.names] || NAMESETS.sq;
+  const w = (set[st.type] || "").trim();
+  return w || (st.type === "S" ? "slow" : "quick");
+}
+function countLabel(st) {
+  if (st.i % S.sub) return "&";
+  const b = Math.floor(st.i / S.sub) + 1;
+  const lb = Math.floor((st.i + st.d - 1) / S.sub) % S.beats + 1;
+  return st.type === "S" && lb !== b ? `${b}–${lb}` : String(b);
+}
+function footOf(st, cyc) {
+  if (S.feet === "off" || st.tap || !D.stepsN) return "";
+  const first = S.feet === "R" ? "P" : "L", other = first === "P" ? "L" : "P";
+  return ((cyc * D.stepsN + st.fk) % 2 === 0) ? first : other;
+}
+function beatsTxt(b) {
+  if (b === 0.5) return "½ uderzenia";
+  if (b === 1.5) return "1½ uderzenia";
+  if (b === 1) return "1 uderzenie";
+  if (Number.isInteger(b)) return b + ((b % 10 >= 2 && b % 10 <= 4 && (b % 100 < 12 || b % 100 > 14)) ? " uderzenia" : " uderzeń");
+  return String(b).replace(".", ",") + " uderzenia";
+}
+const secs = (x) => x.toFixed(2).replace(".", ",") + " s";
+
+/* ---------- tarcza ---------- */
+const C = { R: 188, ring: 150, num: 210, tap: 172, vtx: 122 };
+const ang = (pos) => pos / D.N * 2 * Math.PI;
+const pt = (a, r) => [r2(r * Math.sin(a)), r2(-r * Math.cos(a))];
+function arcPath(a0, a1, r) {
+  const [x0, y0] = pt(a0, r), [x1, y1] = pt(a1, r);
+  return `M${x0} ${y0}A${r} ${r} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${x1} ${y1}`;
+}
+let arcEls = [], numEls = [], hand, tapsG, blkEls = [], colEls = [], footEls = [], headEl, tapsT, TL = {};
+function buildCircle() {
+  const svg = $("#circle");
+  svg.replaceChildren();
+  arcEls = []; numEls = new Array(D.N).fill(null);
+  sv("circle", { r: C.R + 30, class: "face" }, svg);
+  sv("circle", { r: C.R, class: "rim" }, svg);
+  for (let c = 0; c < D.N; c++) {
+    const a = ang(c), onBeat = c % S.sub === 0;
+    const [r1, r3] = onBeat ? [C.R - 8, C.R + 8] : [C.R - 4, C.R + 4];
+    const [x1, y1] = pt(a, r1), [x2, y2] = pt(a, r3);
+    sv("line", { x1, y1, x2, y2, class: "tick" + (c === 0 ? " one" : "") + (onBeat ? "" : " half") }, svg);
+    if (onBeat || D.N <= 24) {
+      const [tx, ty] = pt(a, onBeat ? C.num : C.num - 3);
+      const t = sv("text", { x: tx, y: ty, class: "bnum" + (c === 0 ? " one" : "") + (onBeat ? "" : " half") }, svg);
+      t.textContent = onBeat ? String(c / S.sub + 1) : "&";
+      if (onBeat) numEls[c] = t;
+    }
+  }
+  if (S.poly && D.steps.length >= 2) {
+    sv("polygon", { class: "poly", points: D.steps.map((st) => pt(ang(st.i), C.vtx).join(",")).join(" ") }, svg);
+  }
+  const gapPx = 3;
+  for (const st of D.steps) {
+    const g = gapPx / C.ring;
+    let a0 = ang(st.i) + g, a1 = ang(st.i + st.d) - g;
+    const p = st.d >= D.N
+      ? arcPath(a0, a0 + Math.PI, C.ring) + " " + arcPath(a0 + Math.PI, a1, C.ring).replace(/^M[^A]+/, "")
+      : arcPath(a0, a1, C.ring);
+    arcEls.push(sv("path", { d: p, class: "arc " + st.type }, svg));
+    const w = word(st), len = (a1 - a0) * C.ring;
+    const mid = (a0 + a1) / 2;
+    if (st.type === "T") {
+      const [lx, ly] = pt(mid, C.ring - 22);
+      const t = sv("text", { x: lx, y: ly, class: "alab T", "font-size": Math.min(12, len / 2.2) }, svg);
+      t.textContent = w;
+    } else {
+      const [lx, ly] = pt(mid, C.ring);
+      const fs = Math.max(9, Math.min(18, len / (Math.max(2, w.length) * (st.type === "S" ? 0.72 : 0.5))));
+      const t = sv("text", { x: lx, y: ly, class: "alab " + st.type, "font-size": r2(fs) }, svg);
+      t.textContent = w;
+    }
+    const [vx, vy] = pt(ang(st.i), C.vtx);
+    if (S.poly) sv("circle", { cx: vx, cy: vy, r: 3.2, class: "vtx" + (st.tap ? " T" : "") }, svg);
+  }
+  tapsG = sv("g", {}, svg);
+  hand = sv("g", { class: "hand", visibility: "hidden" }, svg);
+  sv("line", { x1: 0, y1: -(C.vtx + 12), x2: 0, y2: -(C.R + 10) }, hand);
+  sv("circle", { cx: 0, cy: -C.R, r: 5.5 }, hand);
+  svg.setAttribute("aria-label", "Tarcza rytmu: " + seqText());
+}
+
+/* ---------- pasek czasu (TUBS: kratka = jednostka czasu, klocek = trwanie kroku) ---------- */
+function buildTimeline() {
+  const svg = $("#timeline");
+  const W = 1000, H = 150, px0 = 48, px1 = 16, cw = (W - px0 - px1) / D.N;
+  const Y = { num: 16, top: 30, bh: 54, foot: 106, tap: 132 };
+  TL = { W, H, px0, cw, Y };
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.replaceChildren();
+  blkEls = []; colEls = new Array(D.N).fill(null); footEls = [];
+  for (let b = 0; b < S.beats; b++) {
+    const x = px0 + b * S.sub * cw;
+    colEls[b * S.sub] = sv("rect", { x, y: 4, width: S.sub * cw, height: H - 8, rx: 4, class: "col" }, svg);
+  }
+  for (let c = 0; c <= D.N; c++) {
+    const x = r2(px0 + c * cw), beat = c % S.sub === 0;
+    sv("line", { x1: x, x2: x, y1: Y.top - 4, y2: Y.top + Y.bh + 4, class: "grid-l" + (beat ? " beat" : "") }, svg);
+    if (c < D.N && (beat || cw > 22)) {
+      const t = sv("text", { x: r2(px0 + (c + 0.5) * cw), y: Y.num, class: "bnum" + (c === 0 ? " one" : "") + (beat ? "" : " half") }, svg);
+      t.textContent = beat ? String(c / S.sub + 1) : "&";
+    }
+  }
+  const rl = (y, txt) => { const t = sv("text", { x: 6, y, class: "rowlab" }, svg); t.textContent = txt; };
+  rl(Y.top + Y.bh / 2, "KROK");
+  if (S.feet !== "off") rl(Y.foot, "STOPA");
+  rl(Y.tap, "TY");
+  for (const st of D.steps) {
+    const x = px0 + st.i * cw + 2;
+    const bw = Math.min(st.d, D.N - st.i) * cw - 4;   // klocek kończy się na końcu cyklu; reszta na początku
+    const tall = st.type !== "T";
+    const y = tall ? Y.top : Y.top + Y.bh / 2 - 11, h = tall ? Y.bh : 22;
+    const g = sv("g", {}, svg);
+    const rect = sv("rect", { x: r2(x), y, width: r2(Math.max(4, bw)), height: h, class: "blk " + st.type }, g);
+    blkEls.push(g);
+    if (st.i + st.d > D.N) {
+      sv("rect", { x: px0 + 2, y, width: r2((st.i + st.d - D.N) * cw - 4), height: h, class: "blk " + st.type }, g);
+    }
+    const w = word(st);
+    const fs = Math.max(9, Math.min(tall ? 22 : 13, bw / (Math.max(2, w.length) * (st.type === "S" ? 0.7 : 0.5))));
+    const t = sv("text", { x: r2(x + bw / 2), y: y + h / 2, class: "blab " + st.type, "font-size": r2(fs) }, g);
+    t.textContent = w;
+    if (!st.tap && S.feet !== "off") {
+      const f = sv("text", { x: r2(px0 + (st.i + 0.5) * cw), y: Y.foot, class: "foot" }, svg);
+      footEls.push({ el: f, st });
+    }
+    void rect;
+  }
+  sv("line", { x1: px0, x2: W - px1, y1: Y.tap, y2: Y.tap, class: "grid-l" }, svg);
+  tapsT = sv("g", {}, svg);
+  headEl = sv("line", { x1: px0, x2: px0, y1: 6, y2: H - 6, class: "head", visibility: "hidden" }, svg);
+  updateFeet(0);
+  svg.setAttribute("aria-label", "Pasek czasu: " + seqText());
+}
+function updateFeet(cyc) {
+  for (const f of footEls) f.el.textContent = footOf(f.st, cyc);
+}
+function seqText() { return D.steps.length ? D.steps.map(word).join(", ") : "brak kroków"; }
+
+/* ---------- środek: słowo, opis, pasek trwania ---------- */
+const NOW = [
+  { w: $("#wordC"), m: $("#metaC"), f: $("#fillC") },
+  { w: $("#wordL"), m: $("#metaL"), f: $("#fillL") },
+];
+function setNow(type, wordHtml, metaHtml, isHtml) {
+  for (const n of NOW) {
+    n.w.dataset.type = type;
+    if (isHtml) n.w.innerHTML = wordHtml; else n.w.textContent = wordHtml;
+    // długie własne słowa: mniejszy stopień, żeby zmieściły się w środku tarczy
+    n.w.style.fontSize = (!isHtml && "SQT".includes(type) && wordHtml.length > 7) ? `clamp(20px, ${Math.round(84 / wordHtml.length)}cqi, 70px)` : "";
+    n.m.innerHTML = metaHtml;
+    n.f.dataset.type = type;
+  }
+}
+function setFill(frac) {
+  const w = (Math.max(0, Math.min(1, frac)) * 100).toFixed(1) + "%";
+  for (const n of NOW) n.f.firstElementChild.style.width = w;
+}
+function esc(s) { return s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function renderRest() {
+  if (!D.steps.length) { setNow("rest", "Zaznacz kroki w siatce", "", false); setFill(0); }
+  else {
+    const html = D.steps.map((st) => `<span class="${st.type}">${esc(word(st))}</span>`).join(" ");
+    setNow("rest", html, "Start albo spacja", true);
+    setFill(0);
+  }
+  if (hand) hand.setAttribute("visibility", "hidden");
+  if (headEl) headEl.setAttribute("visibility", "hidden");
+  setActive(-1); highlightBeat(-1);
+}
+function renderInfo() {
+  const seen = new Map();
+  for (const st of D.steps) { const k = st.type + st.d; if (!seen.has(k)) seen.set(k, st); }
+  const beatSec = 60 / S.bpm;
+  const parts = [...seen.values()].sort((a, b) => b.d - a.d).map((st) => {
+    const b = st.d / S.sub;
+    return st.type === "T"
+      ? `<span><span class="T">tap</span> = akcent bez ciężaru</span>`
+      : `<span><span class="${st.type}">${esc(word(st))}</span> = ${beatsTxt(b)} = ${secs(b * beatSec)}</span>`;
+  });
+  parts.push(`<span>1 uderzenie = ${secs(beatSec)}</span>`);
+  $("#info").innerHTML = parts.join("");
+}
+
+/* ---------- podświetlenia ---------- */
+let curIdx = -2, curBeat = -2;
+function setActive(idx) {
+  if (idx === curIdx) return;
+  curIdx = idx;
+  arcEls.forEach((e, k) => e.classList.toggle("on", k === idx));
+  blkEls.forEach((e, k) => e.querySelectorAll("rect").forEach((r) => r.classList.toggle("on", k === idx)));
+}
+function highlightBeat(cell) {
+  if (cell === curBeat) return;
+  if (curBeat >= 0) { numEls[curBeat]?.classList.remove("now"); colEls[curBeat]?.classList.remove("now"); }
+  curBeat = cell;
+  if (cell >= 0) { numEls[cell]?.classList.add("now"); colEls[cell]?.classList.add("now"); }
+}
+
+/* ---------- audio: planowanie z wyprzedzeniem na zegarze AudioContext ---------- */
+let ctx = null, gM, gS, noiseBuf;
+let playing = false, timer = 0, raf = 0, nextT = 0, tickI = 0, cin = 0, ticks = [], wake = null, lastCyc = -1;
+const tickDur = () => 60 / S.bpm / S.sub;
+function lat() { return ctx ? (ctx.outputLatency || ctx.baseLatency || 0) : 0; }
+function ensureAudio() {
+  if (!ctx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    ctx = new AC({ latencyHint: "interactive" });
+    const comp = ctx.createDynamicsCompressor();
+    comp.connect(ctx.destination);
+    gM = ctx.createGain(); gS = ctx.createGain();
+    gM.connect(comp); gS.connect(comp);
+    noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    applyVol();
+  }
+  if (ctx.state !== "running") ctx.resume();
+}
+function applyVol() {
+  if (!ctx) return;
+  gM.gain.value = S.vMetro * 0.55;
+  gS.gain.value = S.vSteps;
+}
+function env(g, t, peak, a, dec) {
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(peak, t + a);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + a + dec);
+}
+function blip(t, freq, peak, dec, out, type = "sine") {
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = type; o.frequency.value = freq;
+  env(g, t, peak, 0.002, dec);
+  o.connect(g).connect(out); o.start(t); o.stop(t + dec + 0.03);
+}
+const click = (t, accent) => blip(t, accent ? 1760 : 1100, accent ? 0.9 : 0.5, 0.045, gM);
+const countClick = (t) => blip(t, 880, 0.8, 0.07, gM, "triangle");
+function tum(t) {
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = "sine";
+  o.frequency.setValueAtTime(170, t);
+  o.frequency.exponentialRampToValueAtTime(52, t + 0.28);
+  env(g, t, 1, 0.004, 0.42);
+  o.connect(g).connect(gS); o.start(t); o.stop(t + 0.5);
+}
+function tchi(t) {
+  const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+  s.buffer = noiseBuf; f.type = "highpass"; f.frequency.value = 4800;
+  env(g, t, 0.55, 0.002, 0.07);
+  s.connect(f).connect(g).connect(gS); s.start(t, Math.random() * 0.5); s.stop(t + 0.1);
+}
+function tapSnd(t) {
+  const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+  s.buffer = noiseBuf; f.type = "bandpass"; f.frequency.value = 2400; f.Q.value = 6;
+  env(g, t, 0.7, 0.001, 0.035);
+  s.connect(f).connect(g).connect(gS); s.start(t, Math.random() * 0.5); s.stop(t + 0.06);
+}
+function tone(t, dur, freq) {
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = "triangle"; o.frequency.value = freq;
+  const end = t + Math.max(0.08, dur - 0.035);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.5, t + 0.012);
+  g.gain.setValueAtTime(0.5, Math.max(t + 0.02, end - 0.06));
+  g.gain.exponentialRampToValueAtTime(0.0001, end);
+  o.connect(g).connect(gS); o.start(t); o.stop(end + 0.02);
+}
+function playTick(i, t, dur) {
+  const p = i - cin;
+  if (p < 0) { if (i % S.sub === 0) countClick(t); return; }
+  const pos = p % D.N, cyc = Math.floor(p / D.N);
+  if (pos % S.sub === 0) click(t, pos === 0);
+  const st = D.byCell[pos];
+  if (!st || (S.gap && cyc % 2 === 1)) return;
+  if (st.type === "T") tapSnd(t);
+  else if (S.sound === "tone") tone(t, st.d * dur, st.type === "S" ? 196 : 294);
+  else if (st.type === "S") tum(t); else tchi(t);
+}
+function sched() {
+  while (nextT < ctx.currentTime + 0.12) {
+    const dur = tickDur();
+    playTick(tickI, nextT, dur);
+    ticks.push({ i: tickI, t: nextT, d: dur });
+    if (ticks.length > 128) ticks.shift();
+    nextT += dur; tickI++;
+  }
+}
+function globalPos(v) {
+  for (let k = ticks.length - 1; k >= 0; k--) {
+    const tk = ticks[k];
+    if (tk.t <= v) return tk.i + Math.min(1, (v - tk.t) / tk.d);
+  }
+  return null;
+}
+async function lockScreen() {
+  try { if (navigator.wakeLock) wake = await navigator.wakeLock.request("screen"); } catch (e) { wake = null; }
+}
+function start() {
+  try { ensureAudio(); } catch (e) { $("#tapRead").textContent = "Ta przeglądarka nie daje dźwięku (brak Web Audio)."; return; }
+  playing = true;
+  cin = S.countIn ? 4 * S.sub : 0;
+  tickI = 0; ticks = []; lastCyc = -1; curIdx = -2;
+  nextT = ctx.currentTime + 0.12;
+  taps = []; drawTaps(); $("#tapRead").textContent = "Stukaj w kroki: klawisz T, przycisk albo dotknięcie tarczy.";
+  sched();
+  timer = setInterval(sched, 25);
+  $("#circle").classList.add("playing"); $("#timeline").classList.add("playing");
+  setPlayLabel();
+  raf = requestAnimationFrame(frame);
+  lockScreen();
+}
+function stop() {
+  playing = false;
+  clearInterval(timer); cancelAnimationFrame(raf);
+  $("#circle").classList.remove("playing"); $("#timeline").classList.remove("playing");
+  setPlayLabel(); renderRest();
+  try { wake?.release(); } catch (e) { /* ignoruj */ } wake = null;
+}
+function setPlayLabel() {
+  $("#play").innerHTML = playing
+    ? '<svg viewBox="0 0 14 14" aria-hidden="true"><rect x="2" y="2" width="10" height="10" rx="1.5"/></svg>Stop'
+    : '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="M3 1.5v11l9.5-5.5z"/></svg>Start';
+}
+
+/* ---------- klatka animacji ---------- */
+function frame() {
+  raf = requestAnimationFrame(frame);
+  const g = globalPos(ctx.currentTime - lat());
+  if (g == null) { setNow("count", S.countIn ? "5" : "·", "", false); return; }
+  const p = g - cin;
+  if (p < 0) {
+    const k = Math.floor(g / S.sub);
+    setNow("count", String(5 + k), "odliczanie", false);
+    setFill((g / S.sub) / 4);
+    return;
+  }
+  const N = D.N, cyc = Math.floor(p / N), pos = p - cyc * N;
+  hand.setAttribute("visibility", "visible");
+  hand.setAttribute("transform", `rotate(${r2(pos / N * 360)})`);
+  const hx = r2(TL.px0 + pos * TL.cw);
+  headEl.setAttribute("visibility", "visible");
+  headEl.setAttribute("x1", hx); headEl.setAttribute("x2", hx);
+  highlightBeat(Math.floor(pos / S.sub) * S.sub);
+  const silent = S.gap && cyc % 2 === 1;
+  if (cyc !== lastCyc) { lastCyc = cyc; updateFeet(cyc); curIdx = -2; }
+  if (!D.steps.length) {
+    setNow("beat", String(Math.floor(pos / S.sub) + 1), "", false); setFill(pos / N); return;
+  }
+  const idx = D.curAt[Math.min(N - 1, Math.floor(pos))];
+  const st = D.steps[idx];
+  let since = pos - st.i; if (since < 0) since += N;
+  if (idx !== curIdx) {
+    setActive(idx);
+    const f = footOf(st, cyc);
+    const meta = (st.tap ? "bez ciężaru" : beatsTxt(st.d / S.sub)) + (f ? " · " + (f === "P" ? "prawa" : "lewa") : "")
+      + (silent ? ' · <span class="silent">cisza, trzymaj tempo</span>' : "");
+    setNow(st.type, word(st), meta, false);
+  }
+  setFill(since / st.d);
+}
+
+/* ---------- stukanie: odchyłka od najbliższego kroku ---------- */
+let taps = [];
+function onTap() {
+  const b = $("#tapBtn");
+  b.classList.add("hit"); setTimeout(() => b.classList.remove("hit"), 90);
+  if (!playing) { $("#tapRead").textContent = "Najpierw Start, potem stukaj w kroki."; return; }
+  const g = globalPos(ctx.currentTime - lat());
+  if (g == null || g - cin < 0 || !D.steps.length) return;
+  const N = D.N, p = g - cin, pos = ((p % N) + N) % N;
+  let best = null;
+  for (const st of D.steps) {
+    let d = pos - st.i;
+    if (d > N / 2) d -= N; if (d < -N / 2) d += N;
+    if (!best || Math.abs(d) < Math.abs(best.d)) best = { d, st };
+  }
+  const ms = Math.round(best.d * tickDur() * 1000);
+  taps.push({ pos, ms });
+  if (taps.length > 12) taps.shift();
+  drawTaps();
+  const cls = (m) => Math.abs(m) <= 40 ? "good" : Math.abs(m) <= 90 ? "ok" : "off";
+  const desc = (m) => Math.abs(m) < 10 ? "w punkt" : `${Math.abs(m)} ms ${m > 0 ? "za późno" : "za wcześnie"}`;
+  const avg = Math.round(taps.reduce((a, t) => a + t.ms, 0) / taps.length);
+  $("#tapRead").innerHTML = `Ostatnie: <b class="${cls(ms)}">${desc(ms)}</b> (cel: ${esc(word(best.st))})`
+    + (taps.length > 2 ? ` · średnio z ${taps.length}: <b class="${cls(avg)}">${desc(avg)}</b>` : "");
+}
+function drawTaps() {
+  if (!tapsG || !tapsT) return;
+  tapsG.replaceChildren(); tapsT.replaceChildren();
+  const cls = (m) => Math.abs(m) <= 40 ? "good" : Math.abs(m) <= 90 ? "ok" : "off";
+  taps.forEach((t, k) => {
+    const op = r2(0.35 + 0.65 * (k + 1) / taps.length);
+    const [x, y] = pt(ang(t.pos), C.tap);
+    sv("circle", { cx: x, cy: y, r: 5, class: "tapm " + cls(t.ms), opacity: op }, tapsG);
+    sv("circle", { cx: r2(TL.px0 + t.pos * TL.cw), cy: TL.Y.tap, r: 5.5, class: "tapm " + cls(t.ms), opacity: op }, tapsT);
+  });
+}
+
+/* ---------- panel ---------- */
+const presetSel = $("#preset");
+for (const [k, p] of Object.entries(PRESETS)) presetSel.add(new Option(p.name, k));
+presetSel.add(new Option("Własny wzór", "custom"));
+
+function buildGrid() {
+  const grid = $("#grid");
+  grid.replaceChildren();
+  for (let b = 0; b < S.beats; b++) {
+    const grp = document.createElement("div");
+    grp.className = "beat";
+    for (let s = 0; s < S.sub; s++) {
+      const i = b * S.sub + s, st = S.cells[i], dst = D.byCell[i];
+      const btn = document.createElement("button");
+      btn.type = "button"; btn.className = "cell" + (s ? " half" : "") + (dst ? " " + dst.type : "");
+      btn.dataset.i = i; btn.dataset.state = st;
+      btn.textContent = s ? "&" : String(b + 1);
+      btn.setAttribute("aria-label", (s ? `${b + 1} i` : `Uderzenie ${b + 1}`) + ": " + ["puste", "krok", "tap"][st]);
+      grp.appendChild(btn);
+    }
+    grid.appendChild(grp);
+  }
+}
+$("#grid").addEventListener("click", (e) => {
+  const btn = e.target.closest(".cell"); if (!btn) return;
+  const i = +btn.dataset.i;
+  S.cells[i] = (S.cells[i] + 1) % 3;
+  S.preset = "custom";
+  rebuild(false);
+  $(`.cell[data-i="${i}"]`)?.focus();
+});
+
+function setSeg(id, val) {
+  document.querySelectorAll(`#${id} button`).forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === val)));
+}
+function segHandler(id, fn) {
+  $("#" + id).addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) fn(b.dataset.v); });
+}
+function syncPanel() {
+  presetSel.value = S.preset in PRESETS ? S.preset : "custom";
+  $("#presetNote").textContent = S.preset in PRESETS ? PRESETS[S.preset].note : "Twój wzór. Zmień kratki albo wybierz gotowy.";
+  $("#beats").value = String(S.beats);
+  $("#half").checked = S.sub === 2;
+  setSeg("names", S.names); setSeg("feet", S.feet); setSeg("sound", S.sound); setSeg("view", S.view);
+  $("#customBox").hidden = S.names !== "custom";
+  $("#customS").value = S.custom.S; $("#customQ").value = S.custom.Q;
+  $("#vMetro").value = S.vMetro; $("#vMetroOut").textContent = Math.round(S.vMetro * 100);
+  $("#vSteps").value = S.vSteps; $("#vStepsOut").textContent = Math.round(S.vSteps * 100);
+  $("#countIn").checked = S.countIn; $("#gap").checked = S.gap; $("#poly").checked = S.poly;
+  $("#bpm").value = S.bpm; $("#bpmOut").textContent = S.bpm + " BPM";
+  $("#stage").dataset.view = S.view;
+  $("#circleWrap").hidden = S.view === "line";
+  $("#tlWrap").hidden = S.view === "circle";
+  $("#lineNow").hidden = S.view !== "line";
+}
+function rebuild(structural) {
+  derive();
+  if (structural && playing) { stop(); start(); }
+  buildCircle(); buildTimeline(); buildGrid(); syncPanel(); renderInfo(); drawTaps();
+  curIdx = -2; curBeat = -2;
+  if (!playing) renderRest();
+  save();
+}
+
+presetSel.addEventListener("change", () => {
+  const k = presetSel.value;
+  if (k in PRESETS) {
+    const p = PRESETS[k];
+    S.preset = k; S.beats = p.beats; S.sub = p.sub; S.cells = p.cells.slice(); S.names = p.names; S.feet = p.feet;
+  } else S.preset = "custom";
+  rebuild(true);
+});
+$("#beats").addEventListener("change", (e) => {
+  const nb = +e.target.value, N = nb * S.sub;
+  S.cells = Array.from({ length: N }, (_, i) => S.cells[i] || 0);
+  S.beats = nb; S.preset = "custom";
+  rebuild(true);
+});
+$("#half").addEventListener("change", (e) => {
+  const ns = e.target.checked ? 2 : 1;
+  if (ns === S.sub) return;
+  const old = S.cells, N = S.beats * ns;
+  S.cells = ns === 2
+    ? Array.from({ length: N }, (_, i) => i % 2 ? 0 : old[i / 2] || 0)
+    : Array.from({ length: N }, (_, i) => old[i * 2] || 0);
+  S.sub = ns; S.preset = "custom";
+  rebuild(true);
+});
+segHandler("names", (v) => { S.names = v; rebuild(false); });
+segHandler("feet", (v) => { S.feet = v; rebuild(false); });
+segHandler("sound", (v) => { S.sound = v; syncPanel(); save(); });
+segHandler("view", (v) => { S.view = v; syncPanel(); save(); });
+["customS", "customQ"].forEach((id) => $("#" + id).addEventListener("input", (e) => {
+  S.custom[id === "customS" ? "S" : "Q"] = e.target.value;
+  derive(); buildCircle(); buildTimeline(); renderInfo(); drawTaps(); curIdx = -2; curBeat = -2;
+  if (!playing) renderRest();
+  save();
+}));
+$("#vMetro").addEventListener("input", (e) => { S.vMetro = +e.target.value; $("#vMetroOut").textContent = Math.round(S.vMetro * 100); applyVol(); save(); });
+$("#vSteps").addEventListener("input", (e) => { S.vSteps = +e.target.value; $("#vStepsOut").textContent = Math.round(S.vSteps * 100); applyVol(); save(); });
+$("#countIn").addEventListener("change", (e) => { S.countIn = e.target.checked; save(); });
+$("#gap").addEventListener("change", (e) => { S.gap = e.target.checked; save(); });
+$("#poly").addEventListener("change", (e) => { S.poly = e.target.checked; buildCircle(); drawTaps(); curIdx = -2; curBeat = -2; if (!playing) renderRest(); save(); });
+
+function setBpm(v) {
+  S.bpm = Math.min(160, Math.max(40, Math.round(v)));
+  $("#bpm").value = S.bpm; $("#bpmOut").textContent = S.bpm + " BPM";
+  renderInfo(); save();
+}
+$("#bpm").addEventListener("input", (e) => setBpm(+e.target.value));
+$("#bpmDown").addEventListener("click", () => setBpm(S.bpm - 1));
+$("#bpmUp").addEventListener("click", () => setBpm(S.bpm + 1));
+$("#play").addEventListener("click", () => playing ? stop() : start());
+$("#tapBtn").addEventListener("pointerdown", (e) => { e.preventDefault(); onTap(); });
+$("#tapBtn").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); onTap(); } });
+$("#circleWrap").addEventListener("pointerdown", () => { if (playing) onTap(); });
+
+const stage = $("#stage");
+const IN_APP = /DanceMetronom/.test(navigator.userAgent);   // aplikacja Android: ekran i tak jest pełny
+if (!IN_APP && document.fullscreenEnabled && stage.requestFullscreen) {
+  const fs = $("#fsBtn"); fs.hidden = false;
+  fs.addEventListener("click", () => {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else stage.requestFullscreen().catch(() => {});
+  });
+}
+
+document.addEventListener("keydown", (e) => {
+  const t = e.target, tag = t.tagName;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  if (tag === "INPUT" && t.type === "text") return;
+  if (tag === "SELECT") return;
+  if (e.code === "Space" && tag !== "BUTTON") { e.preventDefault(); playing ? stop() : start(); }
+  else if ((e.key === "t" || e.key === "T") && !e.repeat) { onTap(); }
+  else if ((e.key === "ArrowUp" || e.key === "ArrowDown") && !(tag === "INPUT" && t.type === "range")) {
+    e.preventDefault(); setBpm(S.bpm + (e.key === "ArrowUp" ? 1 : -1) * (e.shiftKey ? 5 : 1));
+  }
+});
+document.addEventListener("visibilitychange", () => { if (playing && document.visibilityState === "visible") lockScreen(); });
+
+setPlayLabel();
+rebuild(false);
+})();
+</script>
+<script>
+if ("serviceWorker" in navigator && location.protocol === "https:" && !/DanceMetronom/.test(navigator.userAgent)) {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+</script>
+</body>
+</html>

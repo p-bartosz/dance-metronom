@@ -1,0 +1,57 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Numer buildu z GitHub Actions: każda wersja ma wyższy versionCode, więc instaluje się na starej.
+def runNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1") as Integer
+
+android {
+    namespace 'pl.bartek.dancemetronom'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'pl.bartek.dancemetronom'
+        minSdk 26
+        targetSdk 34
+        versionCode runNumber
+        versionName "1.0.${runNumber}"
+    }
+
+    // Stały klucz z repo: kolejne APK mają ten sam podpis, więc aktualizacja nie wymaga odinstalowania.
+    // Do użytku własnego. Nie publikuj tym kluczem w Sklepie Play.
+    signingConfigs {
+        release {
+            storeFile file('keystore/release.jks')
+            storePassword 'dance-metronom'
+            keyAlias 'dance'
+            keyPassword 'dance-metronom'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+        debug {
+            signingConfig signingConfigs.release
+        }
+    }
+
+    // Strona aplikacji to katalog web/ z korzenia repo (ten sam plik co wersja PWA).
+    sourceSets {
+        main {
+            assets.srcDirs = ['src/main/assets', '../../web']
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lint {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+}
