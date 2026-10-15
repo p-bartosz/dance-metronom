@@ -100,6 +100,7 @@ header p { margin: 0; color: var(--muted); max-width: 72ch; }
 .rim { fill: none; stroke: var(--line); stroke-width: 1.5; }
 .face { fill: var(--bg); stroke: none; }
 .tick { stroke: var(--muted); stroke-width: 2; }
+.tick.cnt { stroke-width: 1.4; opacity: .8; }
 .tick.half { stroke-width: 1; opacity: .55; }
 .tick.one { stroke: var(--accent); stroke-width: 3.5; }
 .bnum { fill: var(--muted); font: 500 15px var(--font-mono); text-anchor: middle; dominant-baseline: central; }
@@ -240,7 +241,7 @@ kbd { font: 500 11.5px var(--font-mono); background: var(--panel-2); border: 1px
       <button class="btn primary" id="play" type="button"></button>
       <div class="tempo">
         <button class="btn sq" id="bpmDown" type="button" aria-label="Wolniej">−</button>
-        <input id="bpm" type="range" min="40" max="160" step="1" aria-label="Tempo w uderzeniach na minutę">
+        <input id="bpm" type="range" min="40" max="220" step="1" aria-label="Tempo w uderzeniach na minutę">
         <button class="btn sq" id="bpmUp" type="button" aria-label="Szybciej">+</button>
         <output id="bpmOut" for="bpm"></output>
       </div>
@@ -261,14 +262,29 @@ kbd { font: 500 11.5px var(--font-mono); background: var(--panel-2); border: 1px
       <div class="row">
         <span class="lbl">Cykl</span>
         <select id="beats" aria-label="Długość cyklu">
-          <option value="4">4 uderzenia</option>
-          <option value="6">6 uderzeń</option>
-          <option value="8">8 uderzeń</option>
-          <option value="12">12 uderzeń</option>
-          <option value="16">16 uderzeń</option>
+          <option value="4">4 liczby</option>
+          <option value="6">6 liczb</option>
+          <option value="8">8 liczb</option>
+          <option value="12">12 liczb</option>
+          <option value="16">16 liczb</option>
         </select>
-        <label class="check"><input type="checkbox" id="half"> pół uderzenia (&amp;)</label>
+        <label class="check"><input type="checkbox" id="half"> pół liczby (&amp;)</label>
       </div>
+      <div class="row">
+        <span class="lbl">Muzyka</span>
+        <div class="seg" role="group" aria-label="Ile liczb trwa uderzenie muzyki" id="ratio">
+          <button type="button" data-v="1">1 uderzenie = 1 liczba</button>
+          <button type="button" data-v="2">1 uderzenie = 2 liczby</button>
+        </div>
+      </div>
+      <div class="row" id="labelsRow">
+        <span class="lbl">Numeracja</span>
+        <div class="seg" role="group" aria-label="Numeracja" id="labels">
+          <button type="button" data-v="full">liczby 1 2 3 4</button>
+          <button type="button" data-v="half">półliczby 1 &amp; 2 &amp;</button>
+        </div>
+      </div>
+      <p class="hint" id="ratioHint"></p>
       <div class="tubs" id="grid" role="group" aria-label="Siatka kroków"></div>
       <div class="legend"><span><i class="S"></i>długi</span><span><i class="Q"></i>krótki</span><span><i class="T"></i>tap (bez ciężaru)</span></div>
       <p class="hint">Kliknij kratkę: krok → tap → puste. Długi i krótki liczą się same: najkrótszy odstęp między krokami to „quick”, dłuższy to „slow”.</p>
@@ -338,40 +354,60 @@ const r2 = (x) => Math.round(x * 100) / 100;
 
 /* ---------- dane ---------- */
 // cells: 0 puste, 1 krok (z ciężarem), 2 tap (bez ciężaru); jedna kratka = 1/sub uderzenia
+// ratio: ile liczb trwa jedno uderzenie muzyki (zouk liczy się w ósemkach: 2 liczby na uderzenie); bpm: typowe tempo utworu
 const PRESETS = {
-  zouk:    { name: "Zouk: tum-tchi-tchi", beats: 8, sub: 1, cells: [1,0,1,1,1,0,1,1], names: "tt", feet: "R",
-             note: "Tum na 1 trwa dwa uderzenia, tchi na 3 i 4; druga połowa to samo na 5, 7, 8. Stopy prowadzonej: P L P | L P L." },
-  fox:     { name: "Foxtrot towarzyski: S S Q Q", beats: 6, sub: 1, cells: [1,0,1,0,1,1], names: "sq", feet: "L",
+  zouk:    { name: "Zouk: tum-tchi-tchi (1, 3, 4)", beats: 8, sub: 1, cells: [1,0,1,1,1,0,1,1], names: "tt", feet: "R", ratio: 2, bpm: 80,
+             note: "Tum trwa jedno uderzenie muzyki (2 liczby), każde tchi pół. W liczbach kroki są na 1, 3, 4 | 5, 7, 8; w półliczbach to samo zapisuje się 1, 2, & | 3, 4, &. Stopy prowadzonej: P L P | L P L." },
+  zoukTres:{ name: "Zouk tresillo 3-3-2 (1, 2&, 4)", beats: 8, sub: 2, cells: [1,0,0,1,0,0,1,0, 1,0,0,1,0,0,1,0], names: "sq", feet: "R", ratio: 2, bpm: 80,
+             note: "Wariant slow-slow-quick: kroki na 1, 2&, 4 | 5, 6&, 8, trwają 1½, 1½ i 1 liczbę. Muzyka dalej gra boom-chick-chick. Bath Zouk poleca go do muzyki latynoskiej i do ćwiczenia na przemian z podstawowym." },
+  fox:     { name: "Foxtrot towarzyski: S S Q Q", beats: 6, sub: 1, cells: [1,0,1,0,1,1], names: "sq", feet: "L", ratio: 1, bpm: 116,
              note: "Dwa slow po dwa uderzenia i dwa quick po jednym. Cykl ma 6 uderzeń, więc przesuwa się względem taktu 4/4." },
-  rumba:   { name: "Rumba / bolero: Q Q S", beats: 4, sub: 1, cells: [0,1,1,1], names: "sq", feet: "L",
+  rumba:   { name: "Rumba / bolero: Q Q S", beats: 4, sub: 1, cells: [0,1,1,1], names: "sq", feet: "L", ratio: 1, bpm: 100,
              note: "Start na 2: quick 2, quick 3, slow 4–1. Na „raz” nie ma nowego kroku, trwa slow." },
-  salsa:   { name: "Salsa on1: Q Q S", beats: 8, sub: 1, cells: [1,1,1,0,1,1,1,0], names: "sq", feet: "L",
+  salsa:   { name: "Salsa on1: Q Q S", beats: 8, sub: 1, cells: [1,1,1,0,1,1,1,0], names: "sq", feet: "L", ratio: 1, bpm: 180,
              note: "Kroki na 1 2 3 i 5 6 7; na 4 i 8 pauza, więc krok na 3 i 7 jest długi." },
-  chacha:  { name: "Cha-cha: 2 3 4&1", beats: 4, sub: 2, cells: [1,0,1,0,1,0,1,1], names: "sq", feet: "L",
+  chacha:  { name: "Cha-cha: 2 3 4&1", beats: 4, sub: 2, cells: [1,0,1,0,1,0,1,1], names: "sq", feet: "L", ratio: 1, bpm: 120,
              note: "Tu quick to pół uderzenia, a slow to całe: 2 slow, 3 slow, 4 quick, & quick, 1 slow." },
-  bachata: { name: "Bachata: 1 2 3 tap", beats: 8, sub: 1, cells: [1,1,1,2,1,1,1,2], names: "sq", feet: "L",
+  bachata: { name: "Bachata: 1 2 3 tap", beats: 8, sub: 1, cells: [1,1,1,2,1,1,1,2], names: "sq", feet: "L", ratio: 1, bpm: 125,
              note: "Wszystkie kroki równe (quick); na 4 i 8 tap bez przeniesienia ciężaru." },
 };
 const NAMESETS = { sq: { S: "slow", Q: "quick" }, tt: { S: "tum", Q: "tchi" }, pl: { S: "wolno", Q: "szybko" } };
 const KEY = "zegar-krokow-v1";
 const DEF = { preset: "zouk", beats: 8, sub: 1, cells: [1,0,1,1,1,0,1,1], names: "tt", custom: { S: "slow", Q: "quick" },
-  feet: "R", bpm: 80, view: "both", poly: true, sound: "perc", vMetro: 0.35, vSteps: 0.85, countIn: true, gap: false };
+  feet: "R", bpm: 80, ratio: 2, labels: "full", view: "both", poly: true, sound: "perc", vMetro: 0.35, vSteps: 0.85, countIn: true, gap: false };
+const BPM_MIN = 40, BPM_MAX = 220;
+const clampBpm = (v) => Math.min(BPM_MAX, Math.max(BPM_MIN, Math.round(v)));
 
 let S = load();
 function load() {
   let s = JSON.parse(JSON.stringify(DEF));
   try {
     const j = JSON.parse(localStorage.getItem(KEY) || "null");
-    if (j && typeof j === "object") s = { ...s, ...j, custom: { ...s.custom, ...(j.custom || {}) } };
+    if (j && typeof j === "object") {
+      s = { ...s, ...j, custom: { ...s.custom, ...(j.custom || {}) } };
+      // zapis sprzed opcji „uderzenie muzyki”: tempo było w liczbach, więc zostaje 1:1, chyba że to gotowy wzór
+      if (j.ratio == null) s.ratio = (PRESETS[s.preset] && PRESETS[s.preset].ratio) || 1;
+      if (j.ratio == null && s.ratio === 2) s.bpm = PRESETS[s.preset].bpm;
+    }
   } catch (e) { /* bez pamięci przeglądarki: domyślne */ }
   if (![4, 6, 8, 12, 16].includes(+s.beats)) s.beats = 8;
   if (![1, 2].includes(+s.sub)) s.sub = 1;
-  s.beats = +s.beats; s.sub = +s.sub;
+  if (![1, 2].includes(+s.ratio)) s.ratio = 1;
+  if (!["full", "half"].includes(s.labels)) s.labels = "full";
+  s.beats = +s.beats; s.sub = +s.sub; s.ratio = +s.ratio;
   if (!Array.isArray(s.cells)) s.cells = [];
   const N = s.beats * s.sub;
   s.cells = Array.from({ length: N }, (_, i) => [0, 1, 2].includes(s.cells[i]) ? s.cells[i] : 0);
-  s.bpm = Math.min(160, Math.max(40, +s.bpm || 80));
+  s.bpm = clampBpm(+s.bpm || 80);
   return s;
+}
+const per = () => S.sub * S.ratio;                          // kratki na jedno uderzenie muzyki
+const lper = () => S.labels === "half" ? per() : S.sub;     // kratki na jedną numerowaną jednostkę
+function cellLabel(c) {
+  const p = lper(), k = c % p;
+  if (k === 0) { const n = String(c / p + 1); return { t: n, long: n, big: true }; }
+  const t = p === 4 ? ["", "e", "&", "a"][k] : "&";
+  return { t, long: Math.floor(c / p) + 1 + t, big: false };   // t na tarczę, long („2&”) do nazw kroków
 }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignoruj */ } }
 
@@ -408,10 +444,12 @@ function word(st) {
   return w || (st.type === "S" ? "slow" : "quick");
 }
 function countLabel(st) {
-  if (st.i % S.sub) return "&";
-  const b = Math.floor(st.i / S.sub) + 1;
-  const lb = Math.floor((st.i + st.d - 1) / S.sub) % S.beats + 1;
-  return st.type === "S" && lb !== b ? `${b}–${lb}` : String(b);
+  const a = cellLabel(st.i).long;
+  if (st.type !== "S") return a;
+  const p = lper();
+  let last = -1;
+  for (let c = st.i + 1; c < st.i + st.d; c++) if (c % p === 0) last = c % D.N;
+  return last >= 0 ? `${a}–${cellLabel(last).long}` : a;
 }
 function footOf(st, cyc) {
   if (S.feet === "off" || st.tap || !D.stepsN) return "";
@@ -443,15 +481,17 @@ function buildCircle() {
   sv("circle", { r: C.R + 30, class: "face" }, svg);
   sv("circle", { r: C.R, class: "rim" }, svg);
   for (let c = 0; c < D.N; c++) {
-    const a = ang(c), onBeat = c % S.sub === 0;
-    const [r1, r3] = onBeat ? [C.R - 8, C.R + 8] : [C.R - 4, C.R + 4];
-    const [x1, y1] = pt(a, r1), [x2, y2] = pt(a, r3);
-    sv("line", { x1, y1, x2, y2, class: "tick" + (c === 0 ? " one" : "") + (onBeat ? "" : " half") }, svg);
-    if (onBeat || D.N <= 24) {
-      const [tx, ty] = pt(a, onBeat ? C.num : C.num - 3);
-      const t = sv("text", { x: tx, y: ty, class: "bnum" + (c === 0 ? " one" : "") + (onBeat ? "" : " half") }, svg);
-      t.textContent = onBeat ? String(c / S.sub + 1) : "&";
-      if (onBeat) numEls[c] = t;
+    // kreska: długa na uderzeniu muzyki, średnia na liczbie, krótka na „&”
+    const a = ang(c), lvl = c % per() === 0 ? 2 : c % S.sub === 0 ? 1 : 0;
+    const L = [4, 6, 9][lvl];
+    const [x1, y1] = pt(a, C.R - L), [x2, y2] = pt(a, C.R + L);
+    sv("line", { x1, y1, x2, y2, class: "tick" + (c === 0 ? " one" : "") + (lvl === 1 ? " cnt" : lvl === 0 ? " half" : "") }, svg);
+    const lb = cellLabel(c);
+    if (lb.big || D.N <= 24) {
+      const [tx, ty] = pt(a, lb.big ? C.num : C.num - 3);
+      const t = sv("text", { x: tx, y: ty, class: "bnum" + (c === 0 ? " one" : "") + (lb.big ? "" : " half") }, svg);
+      t.textContent = lb.t;
+      if (lb.big) numEls[c] = t;
     }
   }
   if (S.poly && D.steps.length >= 2) {
@@ -467,14 +507,17 @@ function buildCircle() {
     arcEls.push(sv("path", { d: p, class: "arc " + st.type }, svg));
     const w = word(st), len = (a1 - a0) * C.ring;
     const mid = (a0 + a1) / 2;
+    // napis leży wzdłuż łuku; w dolnej połowie obrócony o 180°, żeby nie stał do góry nogami
+    let deg = mid * 180 / Math.PI % 360;
+    if (deg > 90 && deg < 270) deg -= 180;
     if (st.type === "T") {
       const [lx, ly] = pt(mid, C.ring - 22);
-      const t = sv("text", { x: lx, y: ly, class: "alab T", "font-size": Math.min(12, len / 2.2) }, svg);
+      const t = sv("text", { x: lx, y: ly, class: "alab T", "font-size": Math.min(12, len / 2.2), transform: `rotate(${r2(deg)} ${lx} ${ly})` }, svg);
       t.textContent = w;
     } else {
       const [lx, ly] = pt(mid, C.ring);
       const fs = Math.max(9, Math.min(18, len / (Math.max(2, w.length) * (st.type === "S" ? 0.72 : 0.5))));
-      const t = sv("text", { x: lx, y: ly, class: "alab " + st.type, "font-size": r2(fs) }, svg);
+      const t = sv("text", { x: lx, y: ly, class: "alab " + st.type, "font-size": r2(fs), transform: `rotate(${r2(deg)} ${lx} ${ly})` }, svg);
       t.textContent = w;
     }
     const [vx, vy] = pt(ang(st.i), C.vtx);
@@ -496,16 +539,19 @@ function buildTimeline() {
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.replaceChildren();
   blkEls = []; colEls = new Array(D.N).fill(null); footEls = [];
-  for (let b = 0; b < S.beats; b++) {
-    const x = px0 + b * S.sub * cw;
-    colEls[b * S.sub] = sv("rect", { x, y: 4, width: S.sub * cw, height: H - 8, rx: 4, class: "col" }, svg);
+  const u = lper();
+  for (let c = 0; c < D.N; c += u) {
+    colEls[c] = sv("rect", { x: r2(px0 + c * cw), y: 4, width: r2(u * cw), height: H - 8, rx: 4, class: "col" }, svg);
   }
   for (let c = 0; c <= D.N; c++) {
-    const x = r2(px0 + c * cw), beat = c % S.sub === 0;
-    sv("line", { x1: x, x2: x, y1: Y.top - 4, y2: Y.top + Y.bh + 4, class: "grid-l" + (beat ? " beat" : "") }, svg);
-    if (c < D.N && (beat || cw > 22)) {
-      const t = sv("text", { x: r2(px0 + (c + 0.5) * cw), y: Y.num, class: "bnum" + (c === 0 ? " one" : "") + (beat ? "" : " half") }, svg);
-      t.textContent = beat ? String(c / S.sub + 1) : "&";
+    const x = r2(px0 + c * cw), mbeat = c % per() === 0;
+    sv("line", { x1: x, x2: x, y1: Y.top - 4, y2: Y.top + Y.bh + 4, class: "grid-l" + (mbeat ? " beat" : "") }, svg);
+    if (c < D.N) {
+      const lb = cellLabel(c);
+      if (lb.big || cw > 22) {
+        const t = sv("text", { x: r2(px0 + (c + 0.5) * cw), y: Y.num, class: "bnum" + (c === 0 ? " one" : "") + (lb.big ? "" : " half") }, svg);
+        t.textContent = lb.t;
+      }
     }
   }
   const rl = (y, txt) => { const t = sv("text", { x: 6, y, class: "rowlab" }, svg); t.textContent = txt; };
@@ -578,14 +624,14 @@ function renderRest() {
 function renderInfo() {
   const seen = new Map();
   for (const st of D.steps) { const k = st.type + st.d; if (!seen.has(k)) seen.set(k, st); }
-  const beatSec = 60 / S.bpm;
+  const beatSec = 60 / S.bpm;   // jedno uderzenie muzyki
   const parts = [...seen.values()].sort((a, b) => b.d - a.d).map((st) => {
-    const b = st.d / S.sub;
+    const b = st.d / per();
     return st.type === "T"
       ? `<span><span class="T">tap</span> = akcent bez ciężaru</span>`
       : `<span><span class="${st.type}">${esc(word(st))}</span> = ${beatsTxt(b)} = ${secs(b * beatSec)}</span>`;
   });
-  parts.push(`<span>1 uderzenie = ${secs(beatSec)}</span>`);
+  parts.push(`<span>1 uderzenie = ${secs(beatSec)}${S.ratio === 2 ? " = 2 liczby" : ""}</span>`);
   $("#info").innerHTML = parts.join("");
 }
 
@@ -607,7 +653,7 @@ function highlightBeat(cell) {
 /* ---------- audio: planowanie z wyprzedzeniem na zegarze AudioContext ---------- */
 let ctx = null, gM, gS, noiseBuf;
 let playing = false, timer = 0, raf = 0, nextT = 0, tickI = 0, cin = 0, ticks = [], wake = null, lastCyc = -1;
-const tickDur = () => 60 / S.bpm / S.sub;
+const tickDur = () => 60 / S.bpm / per();
 function lat() { return ctx ? (ctx.outputLatency || ctx.baseLatency || 0) : 0; }
 function ensureAudio() {
   if (!ctx) {
@@ -674,9 +720,9 @@ function tone(t, dur, freq) {
 }
 function playTick(i, t, dur) {
   const p = i - cin;
-  if (p < 0) { if (i % S.sub === 0) countClick(t); return; }
+  if (p < 0) { if (i % per() === 0) countClick(t); return; }
   const pos = p % D.N, cyc = Math.floor(p / D.N);
-  if (pos % S.sub === 0) click(t, pos === 0);
+  if (pos % per() === 0) click(t, pos === 0);   // metronom stuka uderzenia muzyki
   const st = D.byCell[pos];
   if (!st || (S.gap && cyc % 2 === 1)) return;
   if (st.type === "T") tapSnd(t);
@@ -705,7 +751,7 @@ async function lockScreen() {
 function start() {
   try { ensureAudio(); } catch (e) { $("#tapRead").textContent = "Ta przeglądarka nie daje dźwięku (brak Web Audio)."; return; }
   playing = true;
-  cin = S.countIn ? 4 * S.sub : 0;
+  cin = S.countIn ? 4 * per() : 0;
   tickI = 0; ticks = []; lastCyc = -1; curIdx = -2;
   nextT = ctx.currentTime + 0.12;
   taps = []; drawTaps(); $("#tapRead").textContent = "Stukaj w kroki: klawisz T, przycisk albo dotknięcie tarczy.";
@@ -736,9 +782,9 @@ function frame() {
   if (g == null) { setNow("count", S.countIn ? "5" : "·", "", false); return; }
   const p = g - cin;
   if (p < 0) {
-    const k = Math.floor(g / S.sub);
+    const k = Math.floor(g / per());
     setNow("count", String(5 + k), "odliczanie", false);
-    setFill((g / S.sub) / 4);
+    setFill((g / per()) / 4);
     return;
   }
   const N = D.N, cyc = Math.floor(p / N), pos = p - cyc * N;
@@ -747,11 +793,11 @@ function frame() {
   const hx = r2(TL.px0 + pos * TL.cw);
   headEl.setAttribute("visibility", "visible");
   headEl.setAttribute("x1", hx); headEl.setAttribute("x2", hx);
-  highlightBeat(Math.floor(pos / S.sub) * S.sub);
+  highlightBeat(Math.floor(pos / lper()) * lper());
   const silent = S.gap && cyc % 2 === 1;
   if (cyc !== lastCyc) { lastCyc = cyc; updateFeet(cyc); curIdx = -2; }
   if (!D.steps.length) {
-    setNow("beat", String(Math.floor(pos / S.sub) + 1), "", false); setFill(pos / N); return;
+    setNow("beat", cellLabel(Math.floor(pos / lper()) * lper()).t, "", false); setFill(pos / N); return;
   }
   const idx = D.curAt[Math.min(N - 1, Math.floor(pos))];
   const st = D.steps[idx];
@@ -759,7 +805,7 @@ function frame() {
   if (idx !== curIdx) {
     setActive(idx);
     const f = footOf(st, cyc);
-    const meta = (st.tap ? "bez ciężaru" : beatsTxt(st.d / S.sub)) + (f ? " · " + (f === "P" ? "prawa" : "lewa") : "")
+    const meta = (st.tap ? "bez ciężaru" : beatsTxt(st.d / per())) + (f ? " · " + (f === "P" ? "prawa" : "lewa") : "")
       + (silent ? ' · <span class="silent">cisza, trzymaj tempo</span>' : "");
     setNow(st.type, word(st), meta, false);
   }
@@ -819,8 +865,8 @@ function buildGrid() {
       const btn = document.createElement("button");
       btn.type = "button"; btn.className = "cell" + (s ? " half" : "") + (dst ? " " + dst.type : "");
       btn.dataset.i = i; btn.dataset.state = st;
-      btn.textContent = s ? "&" : String(b + 1);
-      btn.setAttribute("aria-label", (s ? `${b + 1} i` : `Uderzenie ${b + 1}`) + ": " + ["puste", "krok", "tap"][st]);
+      btn.textContent = cellLabel(i).t;
+      btn.setAttribute("aria-label", (s ? `${b + 1} i` : `Liczba ${b + 1}`) + ": " + ["puste", "krok", "tap"][st]);
       grp.appendChild(btn);
     }
     grid.appendChild(grp);
@@ -847,6 +893,11 @@ function syncPanel() {
   $("#beats").value = String(S.beats);
   $("#half").checked = S.sub === 2;
   setSeg("names", S.names); setSeg("feet", S.feet); setSeg("sound", S.sound); setSeg("view", S.view);
+  setSeg("ratio", String(S.ratio)); setSeg("labels", S.labels);
+  $("#labelsRow").hidden = S.ratio === 1;
+  $("#ratioHint").textContent = S.ratio === 2
+    ? "Tempo to BPM utworu. Metronom stuka uderzenia muzyki, jedno na każde 2 liczby. Kroki 1, 3, 4 w liczbach to 1, 2, & w półliczbach."
+    : "Tempo to liczby na minutę. Metronom stuka każdą liczbę.";
   $("#customBox").hidden = S.names !== "custom";
   $("#customS").value = S.custom.S; $("#customQ").value = S.custom.Q;
   $("#vMetro").value = S.vMetro; $("#vMetroOut").textContent = Math.round(S.vMetro * 100);
@@ -872,6 +923,7 @@ presetSel.addEventListener("change", () => {
   if (k in PRESETS) {
     const p = PRESETS[k];
     S.preset = k; S.beats = p.beats; S.sub = p.sub; S.cells = p.cells.slice(); S.names = p.names; S.feet = p.feet;
+    S.ratio = p.ratio; S.bpm = p.bpm;
   } else S.preset = "custom";
   rebuild(true);
 });
@@ -892,6 +944,13 @@ $("#half").addEventListener("change", (e) => {
   rebuild(true);
 });
 segHandler("names", (v) => { S.names = v; rebuild(false); });
+segHandler("ratio", (v) => {
+  const nr = +v; if (nr === S.ratio) return;
+  S.bpm = clampBpm(S.bpm * S.ratio / nr);   // ta sama prędkość kroków, tylko inna jednostka tempa
+  S.ratio = nr;
+  rebuild(true);
+});
+segHandler("labels", (v) => { S.labels = v; rebuild(false); });
 segHandler("feet", (v) => { S.feet = v; rebuild(false); });
 segHandler("sound", (v) => { S.sound = v; syncPanel(); save(); });
 segHandler("view", (v) => { S.view = v; syncPanel(); save(); });
@@ -908,7 +967,7 @@ $("#gap").addEventListener("change", (e) => { S.gap = e.target.checked; save(); 
 $("#poly").addEventListener("change", (e) => { S.poly = e.target.checked; buildCircle(); drawTaps(); curIdx = -2; curBeat = -2; if (!playing) renderRest(); save(); });
 
 function setBpm(v) {
-  S.bpm = Math.min(160, Math.max(40, Math.round(v)));
+  S.bpm = clampBpm(v);
   $("#bpm").value = S.bpm; $("#bpmOut").textContent = S.bpm + " BPM";
   renderInfo(); save();
 }
