@@ -363,9 +363,9 @@ const PRESETS = {
              note: "Wariant slow-slow-quick: kroki na 1, 2&, 4 | 5, 6&, 8, trwają 1½, 1½ i 1 liczbę. Muzyka dalej gra boom-chick-chick. Bath Zouk poleca go do muzyki latynoskiej i do ćwiczenia na przemian z podstawowym." },
   lambada: { name: "Lambada: 1 2 3 | 5 6 7", beats: 8, sub: 1, cells: [1,1,1,0,1,1,1,0], names: "num", feet: "L", ratio: 1, bpm: 110,
              note: "Stopy stają na 1, 2, 3 i 5, 6, 7. Na 4 i 8 stopy stoją, ruszają się biodra, więc krok na 3 i 7 trwa dwie liczby. Część tancerzy prowadzi „raz” od trzeciego uderzenia taktu. Tempo orientacyjne: lambadę tańczy się zwykle do szybkiej muzyki." },
-  kizomba: { name: "Kizomba: krok na każde uderzenie", beats: 8, sub: 1, cells: [1,1,1,1,1,1,1,1], names: "num", feet: "L", ratio: 1, bpm: 90,
+  kizomba: { name: "Kizomba: krok na każde uderzenie", beats: 8, sub: 1, cells: [1,1,1,1,1,1,1,1], names: "num", feet: "L", ratio: 1, bpm: 90, extra: true,
              note: "Podstawą są przeniesienia ciężaru i kroki marszowe w rytm, bez tapu jak w bachacie. Szkoły numerują warianty podstawy różnie; to najprostszy z nich. Tempo orientacyjne: muzyka jest wolna i równa." },
-  kizombaSlow: { name: "Kizomba wolna: co drugie uderzenie", beats: 8, sub: 1, cells: [1,0,1,0,1,0,1,0], names: "num", feet: "L", ratio: 1, bpm: 90,
+  kizombaSlow: { name: "Kizomba wolna: co drugie uderzenie", beats: 8, sub: 1, cells: [1,0,1,0,1,0,1,0], names: "num", feet: "L", ratio: 1, bpm: 90, extra: true,
              note: "Najprostsza podstawa: przeniesienie ciężaru co drugie uderzenie, miękko i bez pośpiechu." },
   fox:     { name: "Foxtrot towarzyski: S S Q Q", beats: 6, sub: 1, cells: [1,0,1,0,1,1], names: "sq", feet: "L", ratio: 1, bpm: 116, extra: true,
              note: "Dwa slow po dwa uderzenia i dwa quick po jednym. Cykl ma 6 uderzeń, więc przesuwa się względem taktu 4/4." },
@@ -861,8 +861,8 @@ const presetSel = $("#preset");
 // Lista: zouk i tańce główne zawsze; tańce dodatkowe po zaznaczeniu „inne tańce” (albo gdy któryś jest wybrany)
 const GROUPS = [
   ["Zouk", ["zouk", "zoukTres"]],
-  ["Lambada, salsa, bachata, kizomba", ["lambada", "salsa", "bachata", "kizomba", "kizombaSlow"]],
-  ["Dodatkowe", ["fox", "rumba", "chacha"]],
+  ["Lambada, salsa, bachata", ["lambada", "salsa", "bachata"]],
+  ["Dodatkowe", ["kizomba", "kizombaSlow", "fox", "rumba", "chacha"]],
 ];
 function buildPresetOptions() {
   presetSel.replaceChildren();
