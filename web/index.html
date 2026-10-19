@@ -43,6 +43,10 @@ body { margin: 0; } [hidden] { display: none !important; }
   --slow: #ffc857;            /* długi krok */
   --quick: #6fd6cf;           /* krótki krok */
   --tap: #b9a3e8;             /* tap bez ciężaru */
+  --slow2: #ff8f6b;           /* drugi wzór (wewnętrzny okrąg): długi krok */
+  --quick2: #9cabff;          /* drugi wzór: krótki krok, jego wskazówka */
+  --tap2: #e0a6f0;
+  --quick2-soft: rgba(156, 171, 255, .10);
   --ink-on: #1b1620;          /* tekst na kolorowym łuku */
   --good: #7ee08f;
   --ok: #f0a35e;
@@ -131,6 +135,27 @@ header p { margin: 0; color: var(--muted); max-width: 72ch; }
 .foot { fill: var(--muted); font: 600 13px var(--font-mono); text-anchor: middle; dominant-baseline: central; }
 .rowlab { fill: var(--muted); font: 500 10px var(--font-mono); letter-spacing: .08em; dominant-baseline: central; opacity: .7; }
 .head { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
+/* drugi wzór: wewnętrzny okrąg i drugi rząd paska, kolory koral i barwinek */
+.arc.b { stroke-width: 22; }
+.arc.b.S { stroke: var(--slow2); } .arc.b.Q { stroke: var(--quick2); } .arc.b.T { stroke: var(--tap2); stroke-width: 9; }
+.alab.b.T { fill: var(--tap2); }
+.poly.b { fill: var(--quick2-soft); stroke: var(--quick2); }
+.vtx.b { fill: var(--quick2); } .vtx.b.T { fill: var(--tap2); }
+.hand.b line { stroke: var(--quick2); stroke-width: 2.5; }
+.hand.b circle { fill: var(--quick2); }
+.bnum.b { fill: var(--quick2); font-size: 10px; opacity: .8; }
+.bnum.b.half { font-size: 8.5px; opacity: .6; }
+.blk.b.S { fill: var(--slow2); } .blk.b.Q { fill: var(--quick2); } .blk.b.T { fill: var(--tap2); }
+.word2 { font-family: var(--font-display); font-weight: 700; line-height: 1.05; font-size: clamp(13px, 5.2cqi, 32px); white-space: nowrap; }
+.word2[data-type="S"] { color: var(--slow2); font-variation-settings: "wdth" 125; }
+.word2[data-type="Q"] { color: var(--quick2); font-variation-settings: "wdth" 70; }
+.word2[data-type="T"] { color: var(--tap2); font-variation-settings: "wdth" 62; }
+.word2[data-type="rest"] { font-size: clamp(10px, 3cqi, 17px); font-weight: 600; white-space: normal; text-wrap: balance; }
+.word2 .S { color: var(--slow2); } .word2 .Q { color: var(--quick2); } .word2 .T { color: var(--tap2); }
+.circle-wrap[data-dual] .now-in { width: 38%; gap: 4px; }
+.circle-wrap[data-dual] .word { font-size: clamp(20px, 8.5cqi, 60px); }
+.circle-wrap[data-dual] .word[data-type="rest"] { font-size: clamp(11px, 3.2cqi, 19px); }
+.circle-wrap[data-dual] .fill { width: 85%; }
 svg.playing .arc, svg.playing .blk { opacity: .38; }
 svg.playing .arc.on, svg.playing .blk.on { opacity: 1; }
 
@@ -178,6 +203,7 @@ input[type=text] { width: 100%; min-width: 0; }
 .check { display: flex; align-items: center; gap: 9px; font-size: 13.5px; cursor: pointer; }
 .check input { width: 16px; height: 16px; accent-color: var(--accent); margin: 0; flex: none; }
 .hint { color: var(--muted); font-size: 12.5px; margin: 0; }
+.stack { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
 .custom { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .custom label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
 
@@ -193,6 +219,9 @@ input[type=text] { width: 100%; min-width: 0; }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--muted); }
 .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
 .legend .S { background: var(--slow); } .legend .Q { background: var(--quick); } .legend .T { border: 1.5px dashed var(--tap); }
+.legend .S.b { background: var(--slow2); } .legend .Q.b { background: var(--quick2); } .legend .T.b { border-color: var(--tap2); }
+.info .b.S { color: var(--slow2); } .info .b.Q { color: var(--quick2); } .info .b.T { color: var(--tap2); }
+.info .sep { color: var(--quick2); }
 .note { margin: 0; font-size: 13px; color: var(--muted); }
 .keys { color: var(--muted); font-size: 12.5px; margin: 0; }
 kbd { font: 500 11.5px var(--font-mono); background: var(--panel-2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 3px; padding: 0 5px; color: var(--fg); }
@@ -221,6 +250,7 @@ kbd { font: 500 11.5px var(--font-mono); background: var(--panel-2); border: 1px
           <div class="word" id="wordC" data-type="rest"></div>
           <div class="meta" id="metaC"></div>
           <div class="fill" id="fillC"><i></i></div>
+          <div class="word2" id="word2C" data-type="rest" hidden></div>
         </div>
       </div>
     </div>
@@ -230,6 +260,7 @@ kbd { font: 500 11.5px var(--font-mono); background: var(--panel-2); border: 1px
       <div class="side">
         <div class="meta" id="metaL"></div>
         <div class="fill" id="fillL"><i></i></div>
+        <div class="word2" id="word2L" data-type="rest" hidden></div>
       </div>
     </div>
 
@@ -289,6 +320,18 @@ kbd { font: 500 11.5px var(--font-mono); background: var(--panel-2); border: 1px
       <div class="tubs" id="grid" role="group" aria-label="Siatka kroków"></div>
       <div class="legend"><span><i class="S"></i>długi</span><span><i class="Q"></i>krótki</span><span><i class="T"></i>tap (bez ciężaru)</span></div>
       <p class="hint">Kliknij kratkę: krok → tap → puste. Długi i krótki liczą się same: najkrótszy odstęp między krokami to „quick”, dłuższy to „slow”.</p>
+    </section>
+
+    <section class="card" aria-labelledby="h-dual">
+      <h2 id="h-dual">Drugi wzór</h2>
+      <label class="check"><input type="checkbox" id="dualOn"> Nałóż drugi wzór na wewnętrzny okrąg</label>
+      <div class="stack" id="dualBox" hidden>
+        <div class="row"><select id="presetB" aria-label="Drugi wzór"></select></div>
+        <p class="note" id="presetBNote"></p>
+        <div class="field"><label for="vB">Głośność</label><input id="vB" type="range" min="0" max="1" step="0.05"><output id="vBOut" for="vB"></output></div>
+        <div class="legend"><span><i class="S b"></i>długi</span><span><i class="Q b"></i>krótki</span><span><i class="T b"></i>tap</span></div>
+        <p class="hint">Oba wzory idą na tej samej muzyce i tym samym BPM. Drugi brzmi wyżej i lekko z prawej strony. Gdy cykle mają różną długość, każdy okrąg obraca się w swoim tempie, a pasek pokazuje czas do ponownego spotkania na „raz”. Stuknięcia liczą się względem wzoru zewnętrznego.</p>
+      </div>
     </section>
 
     <section class="card" aria-labelledby="h-names">
@@ -381,9 +424,12 @@ const PRESETS = {
 const NAMESETS = { sq: { S: "slow", Q: "quick" }, tt: { S: "tum", Q: "tchi" }, pl: { S: "wolno", Q: "szybko" } };
 const KEY = "zegar-krokow-v1";
 const DEF = { preset: "zouk", beats: 8, sub: 1, cells: [1,0,1,1,1,0,1,1], names: "tt", custom: { S: "slow", Q: "quick" },
-  feet: "R", bpm: 80, ratio: 2, labels: "full", extra: false, view: "both", poly: true, sound: "perc", vMetro: 0.35, vSteps: 0.85, countIn: true, gap: false };
+  feet: "R", bpm: 80, ratio: 2, labels: "full", extra: false, view: "both", poly: true, sound: "perc", vMetro: 0.35, vSteps: 0.85, countIn: true, gap: false,
+  B: { on: false, preset: "zoukTres", vol: 0.8 } };
 const BPM_MIN = 40, BPM_MAX = 220;
 const clampBpm = (v) => Math.min(BPM_MAX, Math.max(BPM_MIN, Math.round(v)));
+// Zegar audio tyka 4 razy na uderzenie muzyki: wspólna siatka dla obu wzorów (wzór ma 1, 2 albo 4 kratki na uderzenie)
+const F = 4;
 
 let S = load();
 function load() {
@@ -406,31 +452,39 @@ function load() {
   const N = s.beats * s.sub;
   s.cells = Array.from({ length: N }, (_, i) => [0, 1, 2].includes(s.cells[i]) ? s.cells[i] : 0);
   s.bpm = clampBpm(+s.bpm || 80);
+  s.B = { ...DEF.B, ...(s.B && typeof s.B === "object" ? s.B : {}) };
+  if (!(s.B.preset in PRESETS)) s.B.preset = DEF.B.preset;
+  s.B.on = !!s.B.on;
+  s.B.vol = Number.isFinite(+s.B.vol) ? Math.min(1, Math.max(0, +s.B.vol)) : DEF.B.vol;
   return s;
 }
-const per = () => S.sub * S.ratio;                          // kratki na jedno uderzenie muzyki
-const lper = () => S.labels === "half" ? per() : S.sub;     // kratki na jedną numerowaną jednostkę
-function cellLabel(c) {
-  const p = lper(), k = c % p;
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignoruj */ } }
+
+// Wzór to { beats, sub, cells, ratio }. Wzór 1 (zewnętrzny) to sam stan S, wzór 2 (wewnętrzny) pochodzi z gotowego presetu.
+const dual = () => S.B.on;
+function patB() { const p = PRESETS[S.B.preset]; return { beats: p.beats, sub: p.sub, cells: p.cells, ratio: p.ratio }; }
+let PB = patB();
+const per = (P = S) => P.sub * P.ratio;                          // kratki na jedno uderzenie muzyki
+const lper = (P = S) => S.labels === "half" ? per(P) : P.sub;    // kratki na jedną numerowaną jednostkę
+function cellLabel(c, P = S) {
+  const p = lper(P), k = c % p;
   if (k === 0) { const n = String(c / p + 1); return { t: n, long: n, big: true }; }
   const t = p === 4 ? ["", "e", "&", "a"][k] : "&";
   return { t, long: Math.floor(c / p) + 1 + t, big: false };   // t na tarczę, long („2&”) do nazw kroków
 }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignoruj */ } }
 
 /* ---------- pochodne ---------- */
-let D;
-function derive() {
-  const N = S.beats * S.sub, on = [];
-  for (let i = 0; i < N; i++) if (S.cells[i]) on.push(i);
+function derive(P) {
+  const N = P.beats * P.sub, on = [];
+  for (let i = 0; i < N; i++) if (P.cells[i]) on.push(i);
   const steps = [], byCell = new Array(N).fill(null), curAt = new Array(N).fill(-1);
   if (on.length) {
     const ds = on.map((i, k) => (k + 1 < on.length ? on[k + 1] : on[0] + N) - i);
     let unit = Infinity;
-    on.forEach((i, k) => { if (S.cells[i] === 1) unit = Math.min(unit, ds[k]); });
+    on.forEach((i, k) => { if (P.cells[i] === 1) unit = Math.min(unit, ds[k]); });
     let fk = 0;
     on.forEach((i, k) => {
-      const tap = S.cells[i] === 2, d = ds[k];
+      const tap = P.cells[i] === 2, d = ds[k];
       const type = tap ? "T" : (on.length === 1 ? "S" : (d <= unit ? "Q" : "S"));
       const st = { i, d, type, tap, fk: tap ? -1 : fk++, idx: k };
       steps.push(st); byCell[i] = st;
@@ -441,22 +495,26 @@ function derive() {
       curAt[c] = best;
     }
   }
-  D = { N, steps, byCell, curAt, stepsN: steps.filter((s) => !s.tap).length };
+  return { N, steps, byCell, curAt, stepsN: steps.filter((s) => !s.tap).length };
 }
-function word(st) {
+let D, DB;
+function deriveAll() { D = derive(S); PB = patB(); DB = derive(PB); }
+function word(st, P = S, Dx = D) {
   if (st.type === "T") return "tap";
-  if (S.names === "num") return countLabel(st);
-  const set = S.names === "custom" ? S.custom : NAMESETS[S.names] || NAMESETS.sq;
+  // wzór 2 bierze nazwy ze swojego presetu (np. tresillo: slow/quick), chyba że wybrano liczby albo własne słowa
+  const names = P === S || ["num", "custom"].includes(S.names) ? S.names : PRESETS[S.B.preset].names;
+  if (names === "num") return countLabel(st, P, Dx);
+  const set = names === "custom" ? S.custom : NAMESETS[names] || NAMESETS.sq;
   const w = (set[st.type] || "").trim();
   return w || (st.type === "S" ? "slow" : "quick");
 }
-function countLabel(st) {
-  const a = cellLabel(st.i).long;
+function countLabel(st, P = S, Dx = D) {
+  const a = cellLabel(st.i, P).long;
   if (st.type !== "S") return a;
-  const p = lper();
+  const p = lper(P);
   let last = -1;
-  for (let c = st.i + 1; c < st.i + st.d; c++) if (c % p === 0) last = c % D.N;
-  return last >= 0 ? `${a}–${cellLabel(last).long}` : a;
+  for (let c = st.i + 1; c < st.i + st.d; c++) if (c % p === 0) last = c % Dx.N;
+  return last >= 0 ? `${a}–${cellLabel(last, P).long}` : a;
 }
 function footOf(st, cyc) {
   if (S.feet === "off" || st.tap || !D.stepsN) return "";
@@ -473,18 +531,54 @@ function beatsTxt(b) {
 const secs = (x) => x.toFixed(2).replace(".", ",") + " s";
 
 /* ---------- tarcza ---------- */
-const C = { R: 188, ring: 150, num: 210, tap: 172, vtx: 122 };
-const ang = (pos) => pos / D.N * 2 * Math.PI;
+// ring: wzór 1 (szer. 30), ringB: wzór 2 (szer. 22), numB: małe liczby wzoru 2 między okręgami, vtxIn: wielokąty w trybie dwóch wzorów
+const C = { R: 188, ring: 150, num: 210, tap: 172, vtx: 122, ringB: 104, numB: 126, vtxIn: 80 };
+const angN = (pos, N) => pos / N * 2 * Math.PI;
+const ang = (pos) => angN(pos, D.N);
 const pt = (a, r) => [r2(r * Math.sin(a)), r2(-r * Math.cos(a))];
 function arcPath(a0, a1, r) {
   const [x0, y0] = pt(a0, r), [x1, y1] = pt(a1, r);
   return `M${x0} ${y0}A${r} ${r} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${x1} ${y1}`;
 }
-let arcEls = [], numEls = [], hand, tapsG, blkEls = [], colEls = [], footEls = [], headEl, tapsT, TL = {};
+let arcEls = [], arcElsB = [], numEls = [], hand, handB = null, tapsG, blkEls = [], colEls = [], footEls = [], headEl, tapsT, TL = {};
+function drawPoly(svg, Dx, r, isB) {
+  if (!S.poly) return;
+  const cls = isB ? " b" : "";
+  if (Dx.steps.length >= 2) sv("polygon", { class: "poly" + cls, points: Dx.steps.map((st) => pt(angN(st.i, Dx.N), r).join(",")).join(" ") }, svg);
+  for (const st of Dx.steps) {
+    const [vx, vy] = pt(angN(st.i, Dx.N), r);
+    sv("circle", { cx: vx, cy: vy, r: 3.2, class: "vtx" + cls + (st.tap ? " T" : "") }, svg);
+  }
+}
+function drawArcs(svg, Dx, P, r, isB) {
+  const els = [], cls = isB ? " b" : "", g = 3 / r;
+  for (const st of Dx.steps) {
+    const a0 = angN(st.i, Dx.N) + g, a1 = angN(st.i + st.d, Dx.N) - g;
+    const p = st.d >= Dx.N
+      ? arcPath(a0, a0 + Math.PI, r) + " " + arcPath(a0 + Math.PI, a1, r).replace(/^M[^A]+/, "")
+      : arcPath(a0, a1, r);
+    els.push(sv("path", { d: p, class: "arc " + st.type + cls }, svg));
+    const w = word(st, P, Dx), len = (a1 - a0) * r, mid = (a0 + a1) / 2;
+    // napis leży wzdłuż łuku; w dolnej połowie obrócony o 180°, żeby nie stał do góry nogami
+    let deg = mid * 180 / Math.PI % 360;
+    if (deg > 90 && deg < 270) deg -= 180;
+    if (st.type === "T") {
+      const [lx, ly] = pt(mid, r - (isB ? 15 : 22));
+      const t = sv("text", { x: lx, y: ly, class: "alab T" + cls, "font-size": r2(Math.min(isB ? 10 : 12, len / 2.2)), transform: `rotate(${r2(deg)} ${lx} ${ly})` }, svg);
+      t.textContent = w;
+    } else {
+      const [lx, ly] = pt(mid, r);
+      const fs = Math.max(isB ? 8 : 9, Math.min(isB ? 13 : 18, len / (Math.max(2, w.length) * (st.type === "S" ? 0.72 : 0.5))));
+      const t = sv("text", { x: lx, y: ly, class: "alab " + st.type + cls, "font-size": r2(fs), transform: `rotate(${r2(deg)} ${lx} ${ly})` }, svg);
+      t.textContent = w;
+    }
+  }
+  return els;
+}
 function buildCircle() {
-  const svg = $("#circle");
+  const svg = $("#circle"), dl = dual();
   svg.replaceChildren();
-  arcEls = []; numEls = new Array(D.N).fill(null);
+  numEls = new Array(D.N).fill(null);
   sv("circle", { r: C.R + 30, class: "face" }, svg);
   sv("circle", { r: C.R, class: "rim" }, svg);
   for (let c = 0; c < D.N; c++) {
@@ -501,48 +595,41 @@ function buildCircle() {
       if (lb.big) numEls[c] = t;
     }
   }
-  if (S.poly && D.steps.length >= 2) {
-    sv("polygon", { class: "poly", points: D.steps.map((st) => pt(ang(st.i), C.vtx).join(",")).join(" ") }, svg);
-  }
-  const gapPx = 3;
-  for (const st of D.steps) {
-    const g = gapPx / C.ring;
-    let a0 = ang(st.i) + g, a1 = ang(st.i + st.d) - g;
-    const p = st.d >= D.N
-      ? arcPath(a0, a0 + Math.PI, C.ring) + " " + arcPath(a0 + Math.PI, a1, C.ring).replace(/^M[^A]+/, "")
-      : arcPath(a0, a1, C.ring);
-    arcEls.push(sv("path", { d: p, class: "arc " + st.type }, svg));
-    const w = word(st), len = (a1 - a0) * C.ring;
-    const mid = (a0 + a1) / 2;
-    // napis leży wzdłuż łuku; w dolnej połowie obrócony o 180°, żeby nie stał do góry nogami
-    let deg = mid * 180 / Math.PI % 360;
-    if (deg > 90 && deg < 270) deg -= 180;
-    if (st.type === "T") {
-      const [lx, ly] = pt(mid, C.ring - 22);
-      const t = sv("text", { x: lx, y: ly, class: "alab T", "font-size": Math.min(12, len / 2.2), transform: `rotate(${r2(deg)} ${lx} ${ly})` }, svg);
-      t.textContent = w;
-    } else {
-      const [lx, ly] = pt(mid, C.ring);
-      const fs = Math.max(9, Math.min(18, len / (Math.max(2, w.length) * (st.type === "S" ? 0.72 : 0.5))));
-      const t = sv("text", { x: lx, y: ly, class: "alab " + st.type, "font-size": r2(fs), transform: `rotate(${r2(deg)} ${lx} ${ly})` }, svg);
-      t.textContent = w;
+  drawPoly(svg, D, dl ? C.vtxIn : C.vtx, false);
+  if (dl) drawPoly(svg, DB, C.vtxIn, true);
+  arcEls = drawArcs(svg, D, S, C.ring, false);
+  arcElsB = [];
+  if (dl) {
+    for (let c = 0; c < DB.N; c++) {
+      const lb = cellLabel(c, PB);
+      if (!lb.big && DB.N > 24) continue;
+      const [tx, ty] = pt(angN(c, DB.N), C.numB);
+      const t = sv("text", { x: tx, y: ty, class: "bnum b" + (lb.big ? "" : " half") }, svg);
+      t.textContent = lb.t;
     }
-    const [vx, vy] = pt(ang(st.i), C.vtx);
-    if (S.poly) sv("circle", { cx: vx, cy: vy, r: 3.2, class: "vtx" + (st.tap ? " T" : "") }, svg);
+    arcElsB = drawArcs(svg, DB, PB, C.ringB, true);
   }
   tapsG = sv("g", {}, svg);
   hand = sv("g", { class: "hand", visibility: "hidden" }, svg);
   sv("line", { x1: 0, y1: -(C.vtx + 12), x2: 0, y2: -(C.R + 10) }, hand);
   sv("circle", { cx: 0, cy: -C.R, r: 5.5 }, hand);
-  svg.setAttribute("aria-label", "Tarcza rytmu: " + seqText());
+  handB = null;
+  if (dl) {
+    handB = sv("g", { class: "hand b", visibility: "hidden" }, svg);
+    sv("line", { x1: 0, y1: -(C.ringB - 16), x2: 0, y2: -(C.ringB + 14) }, handB);
+    sv("circle", { cx: 0, cy: -(C.ringB + 14), r: 4 }, handB);
+  }
+  $("#circleWrap").toggleAttribute("data-dual", dl);
+  svg.setAttribute("aria-label", "Tarcza rytmu: " + seqText() + (dl ? "; wewnątrz: " + seqTextB() : ""));
 }
 
 /* ---------- pasek czasu (TUBS: kratka = jednostka czasu, klocek = trwanie kroku) ---------- */
-function buildTimeline() {
+function buildTimeline() { if (dual()) buildTimelineDual(); else buildTimelineSingle(); }
+function buildTimelineSingle() {
   const svg = $("#timeline");
   const W = 1000, H = 150, px0 = 48, px1 = 16, cw = (W - px0 - px1) / D.N;
   const Y = { num: 16, top: 30, bh: 54, foot: 106, tap: 132 };
-  TL = { W, H, px0, cw, Y };
+  TL = { dual: false, W, H, px0, cw, Y };
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.replaceChildren();
   blkEls = []; colEls = new Array(D.N).fill(null); footEls = [];
@@ -571,7 +658,7 @@ function buildTimeline() {
     const tall = st.type !== "T";
     const y = tall ? Y.top : Y.top + Y.bh / 2 - 11, h = tall ? Y.bh : 22;
     const g = sv("g", {}, svg);
-    const rect = sv("rect", { x: r2(x), y, width: r2(Math.max(4, bw)), height: h, class: "blk " + st.type }, g);
+    sv("rect", { x: r2(x), y, width: r2(Math.max(4, bw)), height: h, class: "blk " + st.type }, g);
     blkEls.push(g);
     if (st.i + st.d > D.N) {
       sv("rect", { x: px0 + 2, y, width: r2((st.i + st.d - D.N) * cw - 4), height: h, class: "blk " + st.type }, g);
@@ -584,7 +671,6 @@ function buildTimeline() {
       const f = sv("text", { x: r2(px0 + (st.i + 0.5) * cw), y: Y.foot, class: "foot" }, svg);
       footEls.push({ el: f, st });
     }
-    void rect;
   }
   sv("line", { x1: px0, x2: W - px1, y1: Y.tap, y2: Y.tap, class: "grid-l" }, svg);
   tapsT = sv("g", {}, svg);
@@ -592,24 +678,97 @@ function buildTimeline() {
   updateFeet(0);
   svg.setAttribute("aria-label", "Pasek czasu: " + seqText());
 }
+const gcd = (a, b) => b ? gcd(b, a % b) : a;
+// Dwa wzory: oś czasu w uderzeniach muzyki, aż oba cykle znów zaczną się razem (najmniejsza wspólna wielokrotność, do 32 uderzeń)
+function buildTimelineDual() {
+  const svg = $("#timeline");
+  const cycA = D.N / per(S), cycB = DB.N / per(PB);
+  const l = cycA * cycB / gcd(cycA, cycB);
+  const span = l <= 32 ? l : Math.max(cycA, cycB);
+  const W = 1000, H = 176, px0 = 64, px1 = 16, bw = (W - px0 - px1) / span;
+  const Y = { num: 16, a: 28, b: 90, h: 52, tap: 158 };
+  TL = { dual: true, W, H, px0, bw, span, Y, segA: [], segB: [] };
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.replaceChildren();
+  blkEls = []; footEls = []; colEls = [];
+  for (let b = 0; b < span; b++) colEls[b] = sv("rect", { x: r2(px0 + b * bw), y: 4, width: r2(bw), height: H - 8, rx: 4, class: "col" }, svg);
+  const pa = per(S), cw = bw / pa, nCells = Math.round(span * pa);
+  for (let k = 0; k <= nCells; k++) {
+    const c = k % D.N, x = r2(px0 + k * cw), mbeat = k % pa === 0;
+    if (mbeat || cw > 14) sv("line", { x1: x, x2: x, y1: Y.a - 4, y2: Y.b + Y.h + 4, class: "grid-l" + (mbeat ? " beat" : "") }, svg);
+    if (k < nCells) {
+      const lb = cellLabel(c);
+      if ((lb.big && cw * lper() > 16) || cw > 22) {
+        const t = sv("text", { x: r2(px0 + (k + 0.5) * cw), y: Y.num, class: "bnum" + (c === 0 ? " one" : "") + (lb.big ? "" : " half") }, svg);
+        t.textContent = lb.t;
+      }
+    }
+  }
+  const rl = (y, txt) => { const t = sv("text", { x: 6, y, class: "rowlab" }, svg); t.textContent = txt; };
+  rl(Y.a + Y.h / 2, "WZÓR 1");
+  rl(Y.b + Y.h / 2, "WZÓR 2");
+  rl(Y.tap, "TY");
+  TL.segA = drawRow(svg, D, S, cycA, Y.a, false);
+  TL.segB = drawRow(svg, DB, PB, cycB, Y.b, true);
+  sv("line", { x1: px0, x2: W - px1, y1: Y.tap, y2: Y.tap, class: "grid-l" }, svg);
+  tapsT = sv("g", {}, svg);
+  headEl = sv("line", { x1: px0, x2: px0, y1: 6, y2: H - 6, class: "head", visibility: "hidden" }, svg);
+  svg.setAttribute("aria-label", "Pasek czasu: " + seqText() + "; drugi wzór: " + seqTextB());
+}
+function drawRow(svg, Dx, P, cyc, y0, isB) {
+  const { px0, bw, span, Y } = TL, p = per(P), segs = [];
+  const reps = Math.ceil(span / cyc);
+  for (let rep = -1; rep < reps; rep++) {
+    for (const st of Dx.steps) {
+      const b0 = rep * cyc + st.i / p, b1 = b0 + st.d / p;
+      const c0 = Math.max(0, b0), c1 = Math.min(span, b1);
+      if (c1 - c0 <= 1e-6) continue;
+      const tall = st.type !== "T";
+      const y = tall ? y0 : y0 + Y.h / 2 - 10, h = tall ? Y.h : 20;
+      const x = px0 + c0 * bw + 2, w = Math.max(3, (c1 - c0) * bw - 4);
+      const g = sv("g", {}, svg);
+      sv("rect", { x: r2(x), y, width: r2(w), height: h, class: "blk " + st.type + (isB ? " b" : "") }, g);
+      const wd = word(st, P, Dx);
+      const fs = Math.min(tall ? 20 : 12, w / (Math.max(2, wd.length) * (st.type === "S" ? 0.7 : 0.5)));
+      if (fs >= 8) {
+        const t = sv("text", { x: r2(x + w / 2), y: y + h / 2, class: "blab " + st.type, "font-size": r2(fs) }, g);
+        t.textContent = wd;
+      }
+      segs.push({ b0: c0, b1: c1, g });
+    }
+  }
+  return segs;
+}
 function updateFeet(cyc) {
   for (const f of footEls) f.el.textContent = footOf(f.st, cyc);
 }
-function seqText() { return D.steps.length ? D.steps.map(word).join(", ") : "brak kroków"; }
+function seqText() { return D.steps.length ? D.steps.map((st) => word(st)).join(", ") : "brak kroków"; }
+function seqTextB() { return DB.steps.map((st) => word(st, PB, DB)).join(", "); }
 
 /* ---------- środek: słowo, opis, pasek trwania ---------- */
 const NOW = [
-  { w: $("#wordC"), m: $("#metaC"), f: $("#fillC") },
-  { w: $("#wordL"), m: $("#metaL"), f: $("#fillL") },
+  { w: $("#wordC"), m: $("#metaC"), f: $("#fillC"), w2: $("#word2C") },
+  { w: $("#wordL"), m: $("#metaL"), f: $("#fillL"), w2: $("#word2L") },
 ];
 function setNow(type, wordHtml, metaHtml, isHtml) {
+  const dl = dual();
   for (const n of NOW) {
     n.w.dataset.type = type;
     if (isHtml) n.w.innerHTML = wordHtml; else n.w.textContent = wordHtml;
     // długie własne słowa: mniejszy stopień, żeby zmieściły się w środku tarczy
-    n.w.style.fontSize = (!isHtml && "SQT".includes(type) && wordHtml.length > 7) ? `clamp(20px, ${Math.round(84 / wordHtml.length)}cqi, 70px)` : "";
+    const len = isHtml ? 0 : wordHtml.length, long = !isHtml && "SQT".includes(type) && len > (dl ? 5 : 7);
+    n.w.style.fontSize = long ? (dl ? `clamp(16px, ${Math.round(52 / len)}cqi, 50px)` : `clamp(20px, ${Math.round(84 / len)}cqi, 70px)`) : "";
     n.m.innerHTML = metaHtml;
     n.f.dataset.type = type;
+  }
+}
+function setNow2(type, text, isHtml) {
+  const dl = dual();
+  for (const n of NOW) {
+    n.w2.hidden = !dl;
+    if (!dl) continue;
+    n.w2.dataset.type = type;
+    if (isHtml) n.w2.innerHTML = text; else n.w2.textContent = text;
   }
 }
 function setFill(frac) {
@@ -624,43 +783,67 @@ function renderRest() {
     setNow("rest", html, "Start albo spacja", true);
     setFill(0);
   }
+  setNow2("rest", DB.steps.map((st) => `<span class="${st.type}">${esc(word(st, PB, DB))}</span>`).join(" "), true);
   if (hand) hand.setAttribute("visibility", "hidden");
+  if (handB) handB.setAttribute("visibility", "hidden");
   if (headEl) headEl.setAttribute("visibility", "hidden");
-  setActive(-1); highlightBeat(-1);
+  setActive(-1); setActiveB(-1); highlightNum(-1); highlightCol(-1); markSeg("A", null); markSeg("B", null);
 }
 function renderInfo() {
-  const seen = new Map();
-  for (const st of D.steps) { const k = st.type + st.d; if (!seen.has(k)) seen.set(k, st); }
   const beatSec = 60 / S.bpm;   // jedno uderzenie muzyki
-  const parts = [...seen.values()].sort((a, b) => b.d - a.d).map((st) => {
-    const b = st.d / per();
-    return st.type === "T"
-      ? `<span><span class="T">tap</span> = akcent bez ciężaru</span>`
-      : `<span><span class="${st.type}">${esc(word(st))}</span> = ${beatsTxt(b)} = ${secs(b * beatSec)}</span>`;
-  });
+  const partsOf = (Dx, P, cls) => {
+    const seen = new Map();
+    for (const st of Dx.steps) { const k = st.type + st.d; if (!seen.has(k)) seen.set(k, st); }
+    return [...seen.values()].sort((a, b) => b.d - a.d).map((st) => {
+      const b = st.d / per(P);
+      return st.type === "T"
+        ? `<span><span class="T${cls}">tap</span> = akcent bez ciężaru</span>`
+        : `<span><span class="${st.type}${cls}">${esc(word(st, P, Dx))}</span> = ${beatsTxt(b)} = ${secs(b * beatSec)}</span>`;
+    });
+  };
+  const parts = partsOf(D, S, "");
+  if (dual()) parts.push(`<span class="sep">wewnątrz:</span>`, ...partsOf(DB, PB, " b"));
   parts.push(`<span>1 uderzenie = ${secs(beatSec)}${S.ratio === 2 ? " = 2 liczby" : ""}</span>`);
   $("#info").innerHTML = parts.join("");
 }
 
 /* ---------- podświetlenia ---------- */
-let curIdx = -2, curBeat = -2;
+let curIdx = -2, curIdxB = -2, curNum = -2, curCol = -2, curSegA = null, curSegB = null;
 function setActive(idx) {
   if (idx === curIdx) return;
   curIdx = idx;
   arcEls.forEach((e, k) => e.classList.toggle("on", k === idx));
   blkEls.forEach((e, k) => e.querySelectorAll("rect").forEach((r) => r.classList.toggle("on", k === idx)));
 }
-function highlightBeat(cell) {
-  if (cell === curBeat) return;
-  if (curBeat >= 0) { numEls[curBeat]?.classList.remove("now"); colEls[curBeat]?.classList.remove("now"); }
-  curBeat = cell;
-  if (cell >= 0) { numEls[cell]?.classList.add("now"); colEls[cell]?.classList.add("now"); }
+function setActiveB(idx) {
+  if (idx === curIdxB) return;
+  curIdxB = idx;
+  arcElsB.forEach((e, k) => e.classList.toggle("on", k === idx));
+}
+function markSeg(which, seg) {
+  const prev = which === "A" ? curSegA : curSegB;
+  if (prev === seg) return;
+  prev?.g.querySelectorAll("rect").forEach((r) => r.classList.remove("on"));
+  seg?.g.querySelectorAll("rect").forEach((r) => r.classList.add("on"));
+  if (which === "A") curSegA = seg; else curSegB = seg;
+}
+function highlightNum(cell) {
+  if (cell === curNum) return;
+  if (curNum >= 0) numEls[curNum]?.classList.remove("now");
+  curNum = cell;
+  if (cell >= 0) numEls[cell]?.classList.add("now");
+}
+function highlightCol(k) {
+  if (k === curCol) return;
+  if (curCol >= 0) colEls[curCol]?.classList.remove("now");
+  curCol = k;
+  if (k >= 0) colEls[k]?.classList.add("now");
 }
 
 /* ---------- audio: planowanie z wyprzedzeniem na zegarze AudioContext ---------- */
-let ctx = null, gM, gS, noiseBuf;
-let playing = false, timer = 0, raf = 0, nextT = 0, tickI = 0, cin = 0, ticks = [], wake = null, lastCyc = -1;
-const tickDur = () => 60 / S.bpm / per();
+let ctx = null, gM, gS, gB, panS = null, panB = null, noiseBuf;
+let playing = false, timer = 0, raf = 0, nextT = 0, tickI = 0, cin = 0, ticks = [], wake = null, lastCyc = -1, lastCycB = -1;
+const tickDur = () => 60 / S.bpm / F;
 function lat() { return ctx ? (ctx.outputLatency || ctx.baseLatency || 0) : 0; }
 function ensureAudio() {
   if (!ctx) {
@@ -668,19 +851,26 @@ function ensureAudio() {
     ctx = new AC({ latencyHint: "interactive" });
     const comp = ctx.createDynamicsCompressor();
     comp.connect(ctx.destination);
-    gM = ctx.createGain(); gS = ctx.createGain();
-    gM.connect(comp); gS.connect(comp);
+    gM = ctx.createGain(); gS = ctx.createGain(); gB = ctx.createGain();
+    gM.connect(comp);
+    if (ctx.createStereoPanner) {
+      panS = ctx.createStereoPanner(); panB = ctx.createStereoPanner();
+      gS.connect(panS).connect(comp); gB.connect(panB).connect(comp);
+    } else { gS.connect(comp); gB.connect(comp); }
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    applyVol();
   }
+  applyVol();
   if (ctx.state !== "running") ctx.resume();
 }
 function applyVol() {
   if (!ctx) return;
   gM.gain.value = S.vMetro * 0.55;
   gS.gain.value = S.vSteps;
+  gB.gain.value = S.B.vol;
+  // dwa wzory: pierwszy lekko z lewej, drugi lekko z prawej (w słuchawkach łatwiej je rozdzielić)
+  if (panS) { panS.pan.value = dual() ? -0.3 : 0; panB.pan.value = dual() ? 0.3 : 0; }
 }
 function env(g, t, peak, a, dec) {
   g.gain.setValueAtTime(0.0001, t);
@@ -695,27 +885,26 @@ function blip(t, freq, peak, dec, out, type = "sine") {
 }
 const click = (t, accent) => blip(t, accent ? 1760 : 1100, accent ? 0.9 : 0.5, 0.045, gM);
 const countClick = (t) => blip(t, 880, 0.8, 0.07, gM, "triangle");
-function tum(t) {
+function drop(t, f0, f1, fall, peak, dec, out) {
   const o = ctx.createOscillator(), g = ctx.createGain();
   o.type = "sine";
-  o.frequency.setValueAtTime(170, t);
-  o.frequency.exponentialRampToValueAtTime(52, t + 0.28);
-  env(g, t, 1, 0.004, 0.42);
-  o.connect(g).connect(gS); o.start(t); o.stop(t + 0.5);
+  o.frequency.setValueAtTime(f0, t);
+  o.frequency.exponentialRampToValueAtTime(f1, t + fall);
+  env(g, t, peak, 0.004, dec);
+  o.connect(g).connect(out); o.start(t); o.stop(t + dec + 0.08);
 }
-function tchi(t) {
+function noise(t, type, freq, q, peak, dec, out) {
   const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
-  s.buffer = noiseBuf; f.type = "highpass"; f.frequency.value = 4800;
-  env(g, t, 0.55, 0.002, 0.07);
-  s.connect(f).connect(g).connect(gS); s.start(t, Math.random() * 0.5); s.stop(t + 0.1);
+  s.buffer = noiseBuf; f.type = type; f.frequency.value = freq; if (q) f.Q.value = q;
+  env(g, t, peak, 0.002, dec);
+  s.connect(f).connect(g).connect(out); s.start(t, Math.random() * 0.5); s.stop(t + dec + 0.03);
 }
-function tapSnd(t) {
-  const s = ctx.createBufferSource(), f = ctx.createBiquadFilter(), g = ctx.createGain();
-  s.buffer = noiseBuf; f.type = "bandpass"; f.frequency.value = 2400; f.Q.value = 6;
-  env(g, t, 0.7, 0.001, 0.035);
-  s.connect(f).connect(g).connect(gS); s.start(t, Math.random() * 0.5); s.stop(t + 0.06);
-}
-function tone(t, dur, freq) {
+const tum = (t) => drop(t, 170, 52, 0.28, 1, 0.42, gS);                        // wzór 1: bęben basowy
+const tchi = (t) => noise(t, "highpass", 4800, 0, 0.55, 0.07, gS);              // wzór 1: szelest
+const bongo = (t) => drop(t, 360, 230, 0.12, 0.8, 0.22, gB);                    // wzór 2: wyższy bęben
+const clave = (t) => { noise(t, "bandpass", 1500, 5, 0.9, 0.05, gB); blip(t, 1250, 0.25, 0.04, gB, "triangle"); };
+const tapSnd = (t, out) => noise(t, "bandpass", 2400, 6, 0.7, 0.035, out);
+function tone(t, dur, freq, out) {
   const o = ctx.createOscillator(), g = ctx.createGain();
   o.type = "triangle"; o.frequency.value = freq;
   const end = t + Math.max(0.08, dur - 0.035);
@@ -723,23 +912,34 @@ function tone(t, dur, freq) {
   g.gain.exponentialRampToValueAtTime(0.5, t + 0.012);
   g.gain.setValueAtTime(0.5, Math.max(t + 0.02, end - 0.06));
   g.gain.exponentialRampToValueAtTime(0.0001, end);
-  o.connect(g).connect(gS); o.start(t); o.stop(end + 0.02);
+  o.connect(g).connect(out); o.start(t); o.stop(end + 0.02);
 }
-function playTick(i, t, dur) {
+function playStep(st, t, dur, isB) {
+  const out = isB ? gB : gS;
+  if (st.type === "T") tapSnd(t, out);
+  else if (S.sound === "tone") tone(t, dur, isB ? (st.type === "S" ? 392 : 523) : (st.type === "S" ? 196 : 294), out);
+  else if (isB) (st.type === "S" ? bongo : clave)(t);
+  else (st.type === "S" ? tum : tchi)(t);
+}
+const layers = () => dual() ? [[S, D, false], [PB, DB, true]] : [[S, D, false]];
+function playTick(i, t) {
   const p = i - cin;
-  if (p < 0) { if (i % per() === 0) countClick(t); return; }
-  const pos = p % D.N, cyc = Math.floor(p / D.N);
-  if (pos % per() === 0) click(t, pos === 0);   // metronom stuka uderzenia muzyki
-  const st = D.byCell[pos];
-  if (!st || (S.gap && cyc % 2 === 1)) return;
-  if (st.type === "T") tapSnd(t);
-  else if (S.sound === "tone") tone(t, st.d * dur, st.type === "S" ? 196 : 294);
-  else if (st.type === "S") tum(t); else tchi(t);
+  if (p < 0) { if (i % F === 0) countClick(t); return; }
+  if (p % F === 0) click(t, ((p / F) * per(S)) % D.N === 0);   // metronom stuka uderzenia muzyki, akcent na „raz” wzoru 1
+  const td = tickDur();
+  for (const [P, Dx, isB] of layers()) {
+    const step = F / per(P);
+    if (p % step) continue;
+    const ci = p / step, pos = ci % Dx.N, cyc = Math.floor(ci / Dx.N);
+    const st = Dx.byCell[pos];
+    if (!st || (S.gap && cyc % 2 === 1)) continue;
+    playStep(st, t, st.d * step * td, isB);
+  }
 }
 function sched() {
   while (nextT < ctx.currentTime + 0.12) {
     const dur = tickDur();
-    playTick(tickI, nextT, dur);
+    playTick(tickI, nextT);
     ticks.push({ i: tickI, t: nextT, d: dur });
     if (ticks.length > 128) ticks.shift();
     nextT += dur; tickI++;
@@ -758,8 +958,8 @@ async function lockScreen() {
 function start() {
   try { ensureAudio(); } catch (e) { $("#tapRead").textContent = "Ta przeglądarka nie daje dźwięku (brak Web Audio)."; return; }
   playing = true;
-  cin = S.countIn ? 4 * per() : 0;
-  tickI = 0; ticks = []; lastCyc = -1; curIdx = -2;
+  cin = S.countIn ? 4 * F : 0;
+  tickI = 0; ticks = []; lastCyc = -1; lastCycB = -1; curIdx = -2; curIdxB = -2;
   nextT = ctx.currentTime + 0.12;
   taps = []; drawTaps(); $("#tapRead").textContent = "Stukaj w kroki: klawisz T, przycisk albo dotknięcie tarczy.";
   sched();
@@ -789,18 +989,29 @@ function frame() {
   if (g == null) { setNow("count", S.countIn ? "5" : "·", "", false); return; }
   const p = g - cin;
   if (p < 0) {
-    const k = Math.floor(g / per());
+    const k = Math.floor(g / F);
     setNow("count", String(5 + k), "odliczanie", false);
-    setFill((g / per()) / 4);
+    setFill((g / F) / 4);
     return;
   }
-  const N = D.N, cyc = Math.floor(p / N), pos = p - cyc * N;
+  const b = p / F;                                   // uderzenia muzyki od startu
+  const N = D.N, pa = b * per(S), cyc = Math.floor(pa / N), pos = pa - cyc * N;
   hand.setAttribute("visibility", "visible");
   hand.setAttribute("transform", `rotate(${r2(pos / N * 360)})`);
-  const hx = r2(TL.px0 + pos * TL.cw);
   headEl.setAttribute("visibility", "visible");
-  headEl.setAttribute("x1", hx); headEl.setAttribute("x2", hx);
-  highlightBeat(Math.floor(pos / lper()) * lper());
+  if (TL.dual) {
+    const bs = b % TL.span, hx = r2(TL.px0 + bs * TL.bw);
+    headEl.setAttribute("x1", hx); headEl.setAttribute("x2", hx);
+    highlightCol(Math.floor(bs));
+    markSeg("A", TL.segA.find((s) => bs >= s.b0 && bs < s.b1) || null);
+    markSeg("B", TL.segB.find((s) => bs >= s.b0 && bs < s.b1) || null);
+  } else {
+    const hx = r2(TL.px0 + pos * TL.cw);
+    headEl.setAttribute("x1", hx); headEl.setAttribute("x2", hx);
+    highlightCol(Math.floor(pos / lper()) * lper());
+  }
+  highlightNum(Math.floor(pos / lper()) * lper());
+  if (dual()) frameB(b);
   const silent = S.gap && cyc % 2 === 1;
   if (cyc !== lastCyc) { lastCyc = cyc; updateFeet(cyc); curIdx = -2; }
   if (!D.steps.length) {
@@ -818,24 +1029,39 @@ function frame() {
   }
   setFill(since / st.d);
 }
+function frameB(b) {
+  const N = DB.N, pb = b * per(PB), cyc = Math.floor(pb / N), pos = pb - cyc * N;
+  if (handB) {
+    handB.setAttribute("visibility", "visible");
+    handB.setAttribute("transform", `rotate(${r2(pos / N * 360)})`);
+  }
+  if (!DB.steps.length) return;
+  if (cyc !== lastCycB) { lastCycB = cyc; curIdxB = -2; }
+  const idx = DB.curAt[Math.min(N - 1, Math.floor(pos))];
+  if (idx !== curIdxB) {
+    setActiveB(idx);
+    const st = DB.steps[idx];
+    setNow2(st.type, word(st, PB, DB), false);
+  }
+}
 
-/* ---------- stukanie: odchyłka od najbliższego kroku ---------- */
+/* ---------- stukanie: odchyłka od najbliższego kroku wzoru 1 ---------- */
 let taps = [];
 function onTap() {
-  const b = $("#tapBtn");
-  b.classList.add("hit"); setTimeout(() => b.classList.remove("hit"), 90);
+  const btn = $("#tapBtn");
+  btn.classList.add("hit"); setTimeout(() => btn.classList.remove("hit"), 90);
   if (!playing) { $("#tapRead").textContent = "Najpierw Start, potem stukaj w kroki."; return; }
   const g = globalPos(ctx.currentTime - lat());
   if (g == null || g - cin < 0 || !D.steps.length) return;
-  const N = D.N, p = g - cin, pos = ((p % N) + N) % N;
+  const b = (g - cin) / F, N = D.N, pos = ((b * per(S)) % N + N) % N;
   let best = null;
   for (const st of D.steps) {
     let d = pos - st.i;
     if (d > N / 2) d -= N; if (d < -N / 2) d += N;
     if (!best || Math.abs(d) < Math.abs(best.d)) best = { d, st };
   }
-  const ms = Math.round(best.d * tickDur() * 1000);
-  taps.push({ pos, ms });
+  const ms = Math.round(best.d * (60 / S.bpm / per(S)) * 1000);
+  taps.push({ pos, ms, bs: TL.dual ? b % TL.span : 0 });
   if (taps.length > 12) taps.shift();
   drawTaps();
   const cls = (m) => Math.abs(m) <= 40 ? "good" : Math.abs(m) <= 90 ? "ok" : "off";
@@ -852,29 +1078,30 @@ function drawTaps() {
     const op = r2(0.35 + 0.65 * (k + 1) / taps.length);
     const [x, y] = pt(ang(t.pos), C.tap);
     sv("circle", { cx: x, cy: y, r: 5, class: "tapm " + cls(t.ms), opacity: op }, tapsG);
-    sv("circle", { cx: r2(TL.px0 + t.pos * TL.cw), cy: TL.Y.tap, r: 5.5, class: "tapm " + cls(t.ms), opacity: op }, tapsT);
+    const tx = TL.dual ? TL.px0 + t.bs * TL.bw : TL.px0 + t.pos * TL.cw;
+    sv("circle", { cx: r2(tx), cy: TL.Y.tap, r: 5.5, class: "tapm " + cls(t.ms), opacity: op }, tapsT);
   });
 }
 
 /* ---------- panel ---------- */
-const presetSel = $("#preset");
+const presetSel = $("#preset"), presetSelB = $("#presetB");
 // Lista: zouk i tańce główne zawsze; tańce dodatkowe po zaznaczeniu „inne tańce” (albo gdy któryś jest wybrany)
 const GROUPS = [
   ["Zouk", ["zouk", "zoukTres"]],
   ["Lambada, salsa, bachata", ["lambada", "salsa", "bachata"]],
   ["Dodatkowe", ["kizomba", "kizombaSlow", "fox", "rumba", "chacha"]],
 ];
-function buildPresetOptions() {
-  presetSel.replaceChildren();
+function buildPresetOptions(sel, cur, withCustom) {
+  sel.replaceChildren();
   for (const [label, keys] of GROUPS) {
-    const ks = keys.filter((k) => !PRESETS[k].extra || S.extra || S.preset === k);
+    const ks = keys.filter((k) => !PRESETS[k].extra || S.extra || cur === k);
     if (!ks.length) continue;
     const g = document.createElement("optgroup");
     g.label = label;
     for (const k of ks) g.appendChild(new Option(PRESETS[k].name, k));
-    presetSel.appendChild(g);
+    sel.appendChild(g);
   }
-  presetSel.add(new Option("Własny wzór", "custom"));
+  if (withCustom) sel.add(new Option("Własny wzór", "custom"));
 }
 
 function buildGrid() {
@@ -911,10 +1138,17 @@ function segHandler(id, fn) {
   $("#" + id).addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) fn(b.dataset.v); });
 }
 function syncPanel() {
-  buildPresetOptions();
+  buildPresetOptions(presetSel, S.preset, true);
+  buildPresetOptions(presetSelB, S.B.preset, false);
   $("#extra").checked = S.extra;
   presetSel.value = S.preset in PRESETS ? S.preset : "custom";
   $("#presetNote").textContent = S.preset in PRESETS ? PRESETS[S.preset].note : "Twój wzór. Zmień kratki albo wybierz gotowy.";
+  $("#h-pat").textContent = dual() ? "Wzór kroków · okrąg zewnętrzny" : "Wzór kroków";
+  $("#dualOn").checked = S.B.on;
+  $("#dualBox").hidden = !S.B.on;
+  presetSelB.value = S.B.preset;
+  $("#presetBNote").textContent = PRESETS[S.B.preset].note;
+  $("#vB").value = S.B.vol; $("#vBOut").textContent = Math.round(S.B.vol * 100);
   $("#beats").value = String(S.beats);
   $("#half").checked = S.sub === 2;
   setSeg("names", S.names); setSeg("feet", S.feet); setSeg("sound", S.sound); setSeg("view", S.view);
@@ -934,11 +1168,16 @@ function syncPanel() {
   $("#tlWrap").hidden = S.view === "circle";
   $("#lineNow").hidden = S.view !== "line";
 }
+function resetMarks() { curIdx = -2; curIdxB = -2; curNum = -2; curCol = -2; curSegA = null; curSegB = null; }
+function redraw() {
+  deriveAll(); buildCircle(); buildTimeline(); renderInfo(); drawTaps(); resetMarks();
+  if (!playing) renderRest();
+}
 function rebuild(structural) {
-  derive();
+  deriveAll();
   if (structural && playing) { stop(); start(); }
   buildCircle(); buildTimeline(); buildGrid(); syncPanel(); renderInfo(); drawTaps();
-  curIdx = -2; curBeat = -2;
+  resetMarks();
   if (!playing) renderRest();
   save();
 }
@@ -952,6 +1191,9 @@ presetSel.addEventListener("change", () => {
   } else S.preset = "custom";
   rebuild(true);
 });
+presetSelB.addEventListener("change", () => { S.B.preset = presetSelB.value; rebuild(true); });
+$("#dualOn").addEventListener("change", (e) => { S.B.on = e.target.checked; applyVol(); rebuild(true); });
+$("#vB").addEventListener("input", (e) => { S.B.vol = +e.target.value; $("#vBOut").textContent = Math.round(S.B.vol * 100); applyVol(); save(); });
 $("#beats").addEventListener("change", (e) => {
   const nb = +e.target.value, N = nb * S.sub;
   S.cells = Array.from({ length: N }, (_, i) => S.cells[i] || 0);
@@ -982,15 +1224,13 @@ segHandler("sound", (v) => { S.sound = v; syncPanel(); save(); });
 segHandler("view", (v) => { S.view = v; syncPanel(); save(); });
 ["customS", "customQ"].forEach((id) => $("#" + id).addEventListener("input", (e) => {
   S.custom[id === "customS" ? "S" : "Q"] = e.target.value;
-  derive(); buildCircle(); buildTimeline(); renderInfo(); drawTaps(); curIdx = -2; curBeat = -2;
-  if (!playing) renderRest();
-  save();
+  redraw(); save();
 }));
 $("#vMetro").addEventListener("input", (e) => { S.vMetro = +e.target.value; $("#vMetroOut").textContent = Math.round(S.vMetro * 100); applyVol(); save(); });
 $("#vSteps").addEventListener("input", (e) => { S.vSteps = +e.target.value; $("#vStepsOut").textContent = Math.round(S.vSteps * 100); applyVol(); save(); });
 $("#countIn").addEventListener("change", (e) => { S.countIn = e.target.checked; save(); });
 $("#gap").addEventListener("change", (e) => { S.gap = e.target.checked; save(); });
-$("#poly").addEventListener("change", (e) => { S.poly = e.target.checked; buildCircle(); drawTaps(); curIdx = -2; curBeat = -2; if (!playing) renderRest(); save(); });
+$("#poly").addEventListener("change", (e) => { S.poly = e.target.checked; redraw(); save(); });
 
 function setBpm(v) {
   S.bpm = clampBpm(v);
