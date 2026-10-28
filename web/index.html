@@ -117,9 +117,6 @@ header p { margin: 0; color: var(--muted); max-width: 72ch; }
 .alab { fill: var(--ink-on); font-family: var(--font-display); font-weight: 700; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
 .alab.S { font-variation-settings: "wdth" 125; } .alab.Q { font-variation-settings: "wdth" 72; }
 .alab.T { fill: var(--tap); font-variation-settings: "wdth" 62; font-weight: 600; }
-.poly { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 1.5; stroke-opacity: .5; stroke-linejoin: round; }
-.vtx { fill: var(--fg); }
-.vtx.T { fill: var(--tap); }
 .hand line { stroke: var(--accent); stroke-width: 3; stroke-linecap: round; }
 .hand circle { fill: var(--accent); }
 .tapm { stroke: var(--bg); stroke-width: 1.5; }
@@ -139,8 +136,6 @@ header p { margin: 0; color: var(--muted); max-width: 72ch; }
 .arc.b { stroke-width: 22; }
 .arc.b.S { stroke: var(--slow2); } .arc.b.Q { stroke: var(--quick2); } .arc.b.T { stroke: var(--tap2); stroke-width: 9; }
 .alab.b.T { fill: var(--tap2); }
-.poly.b { fill: var(--quick2-soft); stroke: var(--quick2); }
-.vtx.b { fill: var(--quick2); } .vtx.b.T { fill: var(--tap2); }
 .hand.b line { stroke: var(--quick2); stroke-width: 2.5; }
 .hand.b circle { fill: var(--quick2); }
 .bnum.b { fill: var(--quick2); font-size: 10px; opacity: .8; }
@@ -392,7 +387,6 @@ kbd { font: 500 11.5px var(--font-mono); background: var(--panel-2); border: 1px
           <button type="button" data-v="circle">tarcza</button>
           <button type="button" data-v="line">pasek</button>
         </div>
-        <label class="check"><input type="checkbox" id="poly"> Kształt rytmu na tarczy (wielokąt z kroków)</label>
         <p class="keys"><kbd>Spacja</kbd> start/stop · <kbd>T</kbd> stuknięcie · <kbd>↑</kbd><kbd>↓</kbd> tempo (z <kbd>Shift</kbd> o 5)</p>
       </div>
     </section>
@@ -440,7 +434,7 @@ const PRESETS = {
 const NAMESETS = { sq: { S: "slow", Q: "quick" }, tt: { S: "tum", Q: "tchi" }, pl: { S: "wolno", Q: "szybko" } };
 const KEY = "zegar-krokow-v1";
 const DEF = { preset: "zouk", beats: 8, sub: 1, cells: [1,0,1,1,1,0,1,1], names: "tt", custom: { S: "slow", Q: "quick" },
-  feet: "R", bpm: 80, ratio: 2, labels: "full", extra: false, view: "both", poly: true, sound: "perc", vMetro: 0.35, vSteps: 0.85, countIn: true, gap: false,
+  feet: "R", bpm: 80, ratio: 2, labels: "full", extra: false, view: "both", sound: "perc", vMetro: 0.35, vSteps: 0.85, countIn: true, gap: false,
   B: { on: false, preset: "zoukTres", vol: 0.8 }, open: { pat: true } };
 const BPM_MIN = 40, BPM_MAX = 220;
 const clampBpm = (v) => Math.min(BPM_MAX, Math.max(BPM_MIN, Math.round(v)));
@@ -548,8 +542,8 @@ function beatsTxt(b) {
 const secs = (x) => x.toFixed(2).replace(".", ",") + " s";
 
 /* ---------- tarcza ---------- */
-// ring: wzór 1 (szer. 30), ringB: wzór 2 (szer. 22), numB: małe liczby wzoru 2 między okręgami, vtxIn: wielokąty w trybie dwóch wzorów
-const C = { R: 188, ring: 150, num: 210, tap: 172, vtx: 122, ringB: 104, numB: 126, vtxIn: 80 };
+// ring: wzór 1 (szer. 30), ringB: wzór 2 (szer. 22), numB: małe liczby wzoru 2 między okręgami
+const C = { R: 188, ring: 150, num: 210, tap: 172, vtx: 122, ringB: 104, numB: 126 };
 const angN = (pos, N) => pos / N * 2 * Math.PI;
 const ang = (pos) => angN(pos, D.N);
 const pt = (a, r) => [r2(r * Math.sin(a)), r2(-r * Math.cos(a))];
@@ -558,15 +552,6 @@ function arcPath(a0, a1, r) {
   return `M${x0} ${y0}A${r} ${r} 0 ${a1 - a0 > Math.PI ? 1 : 0} 1 ${x1} ${y1}`;
 }
 let arcEls = [], arcElsB = [], numEls = [], hand, handB = null, tapsG, blkEls = [], colEls = [], footEls = [], headEl, tapsT, TL = {};
-function drawPoly(svg, Dx, r, isB) {
-  if (!S.poly) return;
-  const cls = isB ? " b" : "";
-  if (Dx.steps.length >= 2) sv("polygon", { class: "poly" + cls, points: Dx.steps.map((st) => pt(angN(st.i, Dx.N), r).join(",")).join(" ") }, svg);
-  for (const st of Dx.steps) {
-    const [vx, vy] = pt(angN(st.i, Dx.N), r);
-    sv("circle", { cx: vx, cy: vy, r: 3.2, class: "vtx" + cls + (st.tap ? " T" : "") }, svg);
-  }
-}
 function drawArcs(svg, Dx, P, r, isB) {
   const els = [], cls = isB ? " b" : "", g = 3 / r;
   for (const st of Dx.steps) {
@@ -612,8 +597,6 @@ function buildCircle() {
       if (lb.big) numEls[c] = t;
     }
   }
-  drawPoly(svg, D, dl ? C.vtxIn : C.vtx, false);
-  if (dl) drawPoly(svg, DB, C.vtxIn, true);
   arcEls = drawArcs(svg, D, S, C.ring, false);
   arcElsB = [];
   if (dl) {
@@ -1178,7 +1161,7 @@ function syncPanel() {
   $("#customS").value = S.custom.S; $("#customQ").value = S.custom.Q;
   $("#vMetro").value = S.vMetro; $("#vMetroOut").textContent = Math.round(S.vMetro * 100);
   $("#vSteps").value = S.vSteps; $("#vStepsOut").textContent = Math.round(S.vSteps * 100);
-  $("#countIn").checked = S.countIn; $("#gap").checked = S.gap; $("#poly").checked = S.poly;
+  $("#countIn").checked = S.countIn; $("#gap").checked = S.gap;
   $("#bpm").value = S.bpm; $("#bpmOut").textContent = S.bpm + " BPM";
   $("#stage").dataset.view = S.view;
   applyFolds();
@@ -1260,7 +1243,6 @@ $("#vMetro").addEventListener("input", (e) => { S.vMetro = +e.target.value; $("#
 $("#vSteps").addEventListener("input", (e) => { S.vSteps = +e.target.value; $("#vStepsOut").textContent = Math.round(S.vSteps * 100); applyVol(); save(); });
 $("#countIn").addEventListener("change", (e) => { S.countIn = e.target.checked; save(); });
 $("#gap").addEventListener("change", (e) => { S.gap = e.target.checked; save(); });
-$("#poly").addEventListener("change", (e) => { S.poly = e.target.checked; redraw(); save(); });
 
 function setBpm(v) {
   S.bpm = clampBpm(v);
