@@ -204,6 +204,12 @@ input[type=text] { width: 100%; min-width: 0; }
 .check input { width: 16px; height: 16px; accent-color: var(--accent); margin: 0; flex: none; }
 .hint { color: var(--muted); font-size: 12.5px; margin: 0; }
 .stack { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+/* zwijane sekcje panelu: nagłówek to przycisk, zwinięta sekcja zostawia sam nagłówek */
+.fold { display: flex; align-items: center; gap: 8px; width: 100%; font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; background: transparent; border: 0; padding: 4px 0; margin: -4px 0; cursor: pointer; text-align: left; }
+.fold:hover { color: var(--accent); }
+.fold .chev { width: 12px; height: 12px; flex: none; transition: transform .15s ease; }
+.fold[aria-expanded="false"] .chev { transform: rotate(-90deg); }
+@media (prefers-reduced-motion: reduce) { .fold .chev { transition: none; } }
 .custom { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .custom label { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); }
 
@@ -285,100 +291,110 @@ kbd { font: 500 11.5px var(--font-mono); background: var(--panel-2); border: 1px
 
   <aside class="panel">
     <section class="card" aria-labelledby="h-pat">
-      <h2 id="h-pat">Wzór kroków</h2>
-      <div class="row">
-        <select id="preset" aria-label="Gotowy wzór"></select>
-        <label class="check"><input type="checkbox" id="extra"> inne tańce</label>
-      </div>
-      <p class="note" id="presetNote"></p>
-      <div class="row">
-        <span class="lbl">Cykl</span>
-        <select id="beats" aria-label="Długość cyklu">
-          <option value="4">4 liczby</option>
-          <option value="6">6 liczb</option>
-          <option value="8">8 liczb</option>
-          <option value="12">12 liczb</option>
-          <option value="16">16 liczb</option>
-        </select>
-        <label class="check"><input type="checkbox" id="half"> pół liczby (&amp;)</label>
-      </div>
-      <div class="row">
-        <span class="lbl">Muzyka</span>
-        <div class="seg" role="group" aria-label="Ile liczb trwa uderzenie muzyki" id="ratio">
-          <button type="button" data-v="1">1 uderzenie = 1 liczba</button>
-          <button type="button" data-v="2">1 uderzenie = 2 liczby</button>
+      <h2 id="h-pat"><button class="fold" type="button" data-fold="pat" aria-expanded="false" aria-controls="body-pat"><svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.25 6 7.75l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="title-pat">Wzór kroków</span></button></h2>
+      <div class="stack" id="body-pat" hidden>
+        <div class="row">
+          <select id="preset" aria-label="Gotowy wzór"></select>
+          <label class="check"><input type="checkbox" id="extra"> inne tańce</label>
         </div>
-      </div>
-      <div class="row" id="labelsRow">
-        <span class="lbl">Numeracja</span>
-        <div class="seg" role="group" aria-label="Numeracja" id="labels">
-          <button type="button" data-v="full">liczby 1 2 3 4</button>
-          <button type="button" data-v="half">półliczby 1 &amp; 2 &amp;</button>
+        <p class="note" id="presetNote"></p>
+        <div class="row">
+          <span class="lbl">Cykl</span>
+          <select id="beats" aria-label="Długość cyklu">
+            <option value="4">4 liczby</option>
+            <option value="6">6 liczb</option>
+            <option value="8">8 liczb</option>
+            <option value="12">12 liczb</option>
+            <option value="16">16 liczb</option>
+          </select>
+          <label class="check"><input type="checkbox" id="half"> pół liczby (&amp;)</label>
         </div>
+        <div class="row">
+          <span class="lbl">Muzyka</span>
+          <div class="seg" role="group" aria-label="Ile liczb trwa uderzenie muzyki" id="ratio">
+            <button type="button" data-v="1">1 uderzenie = 1 liczba</button>
+            <button type="button" data-v="2">1 uderzenie = 2 liczby</button>
+          </div>
+        </div>
+        <div class="row" id="labelsRow">
+          <span class="lbl">Numeracja</span>
+          <div class="seg" role="group" aria-label="Numeracja" id="labels">
+            <button type="button" data-v="full">liczby 1 2 3 4</button>
+            <button type="button" data-v="half">półliczby 1 &amp; 2 &amp;</button>
+          </div>
+        </div>
+        <p class="hint" id="ratioHint"></p>
+        <div class="tubs" id="grid" role="group" aria-label="Siatka kroków"></div>
+        <div class="legend"><span><i class="S"></i>długi</span><span><i class="Q"></i>krótki</span><span><i class="T"></i>tap (bez ciężaru)</span></div>
+        <p class="hint">Kliknij kratkę: krok → tap → puste. Długi i krótki liczą się same: najkrótszy odstęp między krokami to „quick”, dłuższy to „slow”.</p>
       </div>
-      <p class="hint" id="ratioHint"></p>
-      <div class="tubs" id="grid" role="group" aria-label="Siatka kroków"></div>
-      <div class="legend"><span><i class="S"></i>długi</span><span><i class="Q"></i>krótki</span><span><i class="T"></i>tap (bez ciężaru)</span></div>
-      <p class="hint">Kliknij kratkę: krok → tap → puste. Długi i krótki liczą się same: najkrótszy odstęp między krokami to „quick”, dłuższy to „slow”.</p>
     </section>
 
     <section class="card" aria-labelledby="h-dual">
-      <h2 id="h-dual">Drugi wzór</h2>
-      <label class="check"><input type="checkbox" id="dualOn"> Nałóż drugi wzór na wewnętrzny okrąg</label>
-      <div class="stack" id="dualBox" hidden>
-        <div class="row"><select id="presetB" aria-label="Drugi wzór"></select></div>
-        <p class="note" id="presetBNote"></p>
-        <div class="field"><label for="vB">Głośność</label><input id="vB" type="range" min="0" max="1" step="0.05"><output id="vBOut" for="vB"></output></div>
-        <div class="legend"><span><i class="S b"></i>długi</span><span><i class="Q b"></i>krótki</span><span><i class="T b"></i>tap</span></div>
-        <p class="hint">Oba wzory idą na tej samej muzyce i tym samym BPM. Drugi brzmi wyżej i lekko z prawej strony. Gdy cykle mają różną długość, każdy okrąg obraca się w swoim tempie, a pasek pokazuje czas do ponownego spotkania na „raz”. Stuknięcia liczą się względem wzoru zewnętrznego.</p>
+      <h2 id="h-dual"><button class="fold" type="button" data-fold="dual" aria-expanded="false" aria-controls="body-dual"><svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.25 6 7.75l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="title-dual">Drugi wzór</span></button></h2>
+      <div class="stack" id="body-dual" hidden>
+        <label class="check"><input type="checkbox" id="dualOn"> Nałóż drugi wzór na wewnętrzny okrąg</label>
+        <div class="stack" id="dualBox" hidden>
+          <div class="row"><select id="presetB" aria-label="Drugi wzór"></select></div>
+          <p class="note" id="presetBNote"></p>
+          <div class="field"><label for="vB">Głośność</label><input id="vB" type="range" min="0" max="1" step="0.05"><output id="vBOut" for="vB"></output></div>
+          <div class="legend"><span><i class="S b"></i>długi</span><span><i class="Q b"></i>krótki</span><span><i class="T b"></i>tap</span></div>
+          <p class="hint">Oba wzory idą na tej samej muzyce i tym samym BPM. Drugi brzmi wyżej i lekko z prawej strony. Gdy cykle mają różną długość, każdy okrąg obraca się w swoim tempie, a pasek pokazuje czas do ponownego spotkania na „raz”. Stuknięcia liczą się względem wzoru zewnętrznego.</p>
+        </div>
       </div>
     </section>
 
     <section class="card" aria-labelledby="h-names">
-      <h2 id="h-names">Nazwy</h2>
-      <div class="seg" role="group" aria-label="Nazwy kroków" id="names">
-        <button type="button" data-v="sq">slow · quick</button>
-        <button type="button" data-v="tt">tum · tchi</button>
-        <button type="button" data-v="pl">wolno · szybko</button>
-        <button type="button" data-v="num">1 2 3</button>
-        <button type="button" data-v="custom">własne</button>
-      </div>
-      <div class="custom" id="customBox" hidden>
-        <label>Długi krok<input type="text" id="customS" maxlength="14"></label>
-        <label>Krótki krok<input type="text" id="customQ" maxlength="14"></label>
-      </div>
-      <div class="row">
-        <span class="lbl">Stopy</span>
-        <div class="seg" role="group" aria-label="Stopy" id="feet">
-          <button type="button" data-v="off">ukryj</button>
-          <button type="button" data-v="R">od prawej</button>
-          <button type="button" data-v="L">od lewej</button>
+      <h2 id="h-names"><button class="fold" type="button" data-fold="names" aria-expanded="false" aria-controls="body-names"><svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.25 6 7.75l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="title-names">Nazwy</span></button></h2>
+      <div class="stack" id="body-names" hidden>
+        <div class="seg" role="group" aria-label="Nazwy kroków" id="names">
+          <button type="button" data-v="sq">slow · quick</button>
+          <button type="button" data-v="tt">tum · tchi</button>
+          <button type="button" data-v="pl">wolno · szybko</button>
+          <button type="button" data-v="num">1 2 3</button>
+          <button type="button" data-v="custom">własne</button>
+        </div>
+        <div class="custom" id="customBox" hidden>
+          <label>Długi krok<input type="text" id="customS" maxlength="14"></label>
+          <label>Krótki krok<input type="text" id="customQ" maxlength="14"></label>
+        </div>
+        <div class="row">
+          <span class="lbl">Stopy</span>
+          <div class="seg" role="group" aria-label="Stopy" id="feet">
+            <button type="button" data-v="off">ukryj</button>
+            <button type="button" data-v="R">od prawej</button>
+            <button type="button" data-v="L">od lewej</button>
+          </div>
         </div>
       </div>
     </section>
 
     <section class="card" aria-labelledby="h-snd">
-      <h2 id="h-snd">Dźwięk</h2>
-      <div class="seg" role="group" aria-label="Brzmienie kroków" id="sound">
-        <button type="button" data-v="perc">perkusja tum / tchi</button>
-        <button type="button" data-v="tone">tony o długości kroku</button>
+      <h2 id="h-snd"><button class="fold" type="button" data-fold="snd" aria-expanded="false" aria-controls="body-snd"><svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.25 6 7.75l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="title-snd">Dźwięk</span></button></h2>
+      <div class="stack" id="body-snd" hidden>
+        <div class="seg" role="group" aria-label="Brzmienie kroków" id="sound">
+          <button type="button" data-v="perc">perkusja tum / tchi</button>
+          <button type="button" data-v="tone">tony o długości kroku</button>
+        </div>
+        <div class="field"><label for="vMetro">Metronom</label><input id="vMetro" type="range" min="0" max="1" step="0.05"><output id="vMetroOut" for="vMetro"></output></div>
+        <div class="field"><label for="vSteps">Kroki</label><input id="vSteps" type="range" min="0" max="1" step="0.05"><output id="vStepsOut" for="vSteps"></output></div>
+        <label class="check"><input type="checkbox" id="countIn"> Odliczanie „5, 6, 7, 8” przed startem</label>
+        <label class="check"><input type="checkbox" id="gap"> Co drugi cykl bez dźwięku kroków (zostaje metronom)</label>
+        <p class="hint">Pomiar stuknięć odejmuje opóźnienie głośnika zgłaszane przez przeglądarkę. Słuchawki Bluetooth dokładają swoje, więc wynik może wyjść stale „za późno”.</p>
       </div>
-      <div class="field"><label for="vMetro">Metronom</label><input id="vMetro" type="range" min="0" max="1" step="0.05"><output id="vMetroOut" for="vMetro"></output></div>
-      <div class="field"><label for="vSteps">Kroki</label><input id="vSteps" type="range" min="0" max="1" step="0.05"><output id="vStepsOut" for="vSteps"></output></div>
-      <label class="check"><input type="checkbox" id="countIn"> Odliczanie „5, 6, 7, 8” przed startem</label>
-      <label class="check"><input type="checkbox" id="gap"> Co drugi cykl bez dźwięku kroków (zostaje metronom)</label>
-      <p class="hint">Pomiar stuknięć odejmuje opóźnienie głośnika zgłaszane przez przeglądarkę. Słuchawki Bluetooth dokładają swoje, więc wynik może wyjść stale „za późno”.</p>
     </section>
 
     <section class="card" aria-labelledby="h-view">
-      <h2 id="h-view">Widok</h2>
-      <div class="seg" role="group" aria-label="Widok" id="view">
-        <button type="button" data-v="both">tarcza + pasek</button>
-        <button type="button" data-v="circle">tarcza</button>
-        <button type="button" data-v="line">pasek</button>
+      <h2 id="h-view"><button class="fold" type="button" data-fold="view" aria-expanded="false" aria-controls="body-view"><svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.25 6 7.75l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="title-view">Widok</span></button></h2>
+      <div class="stack" id="body-view" hidden>
+        <div class="seg" role="group" aria-label="Widok" id="view">
+          <button type="button" data-v="both">tarcza + pasek</button>
+          <button type="button" data-v="circle">tarcza</button>
+          <button type="button" data-v="line">pasek</button>
+        </div>
+        <label class="check"><input type="checkbox" id="poly"> Kształt rytmu na tarczy (wielokąt z kroków)</label>
+        <p class="keys"><kbd>Spacja</kbd> start/stop · <kbd>T</kbd> stuknięcie · <kbd>↑</kbd><kbd>↓</kbd> tempo (z <kbd>Shift</kbd> o 5)</p>
       </div>
-      <label class="check"><input type="checkbox" id="poly"> Kształt rytmu na tarczy (wielokąt z kroków)</label>
-      <p class="keys"><kbd>Spacja</kbd> start/stop · <kbd>T</kbd> stuknięcie · <kbd>↑</kbd><kbd>↓</kbd> tempo (z <kbd>Shift</kbd> o 5)</p>
     </section>
   </aside>
 </main>
@@ -425,7 +441,7 @@ const NAMESETS = { sq: { S: "slow", Q: "quick" }, tt: { S: "tum", Q: "tchi" }, p
 const KEY = "zegar-krokow-v1";
 const DEF = { preset: "zouk", beats: 8, sub: 1, cells: [1,0,1,1,1,0,1,1], names: "tt", custom: { S: "slow", Q: "quick" },
   feet: "R", bpm: 80, ratio: 2, labels: "full", extra: false, view: "both", poly: true, sound: "perc", vMetro: 0.35, vSteps: 0.85, countIn: true, gap: false,
-  B: { on: false, preset: "zoukTres", vol: 0.8 } };
+  B: { on: false, preset: "zoukTres", vol: 0.8 }, open: { pat: true } };
 const BPM_MIN = 40, BPM_MAX = 220;
 const clampBpm = (v) => Math.min(BPM_MAX, Math.max(BPM_MIN, Math.round(v)));
 // Zegar audio tyka 4 razy na uderzenie muzyki: wspólna siatka dla obu wzorów (wzór ma 1, 2 albo 4 kratki na uderzenie)
@@ -455,6 +471,7 @@ function load() {
   s.B = { ...DEF.B, ...(s.B && typeof s.B === "object" ? s.B : {}) };
   if (!(s.B.preset in PRESETS)) s.B.preset = DEF.B.preset;
   s.B.on = !!s.B.on;
+  s.open = s.open && typeof s.open === "object" ? s.open : { pat: true };
   s.B.vol = Number.isFinite(+s.B.vol) ? Math.min(1, Math.max(0, +s.B.vol)) : DEF.B.vol;
   return s;
 }
@@ -1143,7 +1160,7 @@ function syncPanel() {
   $("#extra").checked = S.extra;
   presetSel.value = S.preset in PRESETS ? S.preset : "custom";
   $("#presetNote").textContent = S.preset in PRESETS ? PRESETS[S.preset].note : "Twój wzór. Zmień kratki albo wybierz gotowy.";
-  $("#h-pat").textContent = dual() ? "Wzór kroków · okrąg zewnętrzny" : "Wzór kroków";
+  $("#title-pat").textContent = dual() ? "Wzór kroków · okrąg zewnętrzny" : "Wzór kroków";
   $("#dualOn").checked = S.B.on;
   $("#dualBox").hidden = !S.B.on;
   presetSelB.value = S.B.preset;
@@ -1164,10 +1181,23 @@ function syncPanel() {
   $("#countIn").checked = S.countIn; $("#gap").checked = S.gap; $("#poly").checked = S.poly;
   $("#bpm").value = S.bpm; $("#bpmOut").textContent = S.bpm + " BPM";
   $("#stage").dataset.view = S.view;
+  applyFolds();
   $("#circleWrap").hidden = S.view === "line";
   $("#tlWrap").hidden = S.view === "circle";
   $("#lineNow").hidden = S.view !== "line";
 }
+function applyFolds() {
+  document.querySelectorAll(".fold[data-fold]").forEach((b) => {
+    const k = b.dataset.fold, open = !!S.open[k];
+    b.setAttribute("aria-expanded", String(open));
+    $("#body-" + k).hidden = !open;
+  });
+}
+document.querySelectorAll(".fold[data-fold]").forEach((b) => b.addEventListener("click", () => {
+  const k = b.dataset.fold;
+  S.open[k] = !S.open[k];
+  applyFolds(); save();
+}));
 function resetMarks() { curIdx = -2; curIdxB = -2; curNum = -2; curCol = -2; curSegA = null; curSegB = null; }
 function redraw() {
   deriveAll(); buildCircle(); buildTimeline(); renderInfo(); drawTaps(); resetMarks();
